@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700;900&display=swap');
+
+:root {
+    --primary-main-color: #4e73df;
+    --primary-dark-color: #3c3744;
+    --primary-light-color: #fbfff1;
+    --secondary-color: #3066be;
+    --tertiary-color: #b4c5e4;
+    
+    --accent-color: #090c9b;
+    --background-color: #f6f9ff;
+
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+
+    --main-font: 'Roboto', sans-serif;
+}
+
+* {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+}
+
+/* Side Navigation Bar */
+
+.side-navigation , .top-nav {
+    background-color: white;
+}
+
+.side-navigation .nav-link{
+    background-color: white;
+    color: var(--dark-color);
+}
+
+.side-navigation .nav-link:hover {
+    background-color: var(--background-color);
+    color: var(--primary-main-color);
+}
+
+.side-navigation .nav-link.active {
+    background-color: var(--primary-main-color);
+    color: #b10e0e;
+}
+
+.side-navigation .collapse .nav-link.active {
+    background-color: var(--primary-main-color);
+    color: #fff;
+}
+
+.side-navigation .card {
+    background-color: var(--background-color); 
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0px 3px rgba(0, 0, 0, 0.1);
+}
+
+.side-navigation .card .nav-link{
+    background-color: rgba(255, 255, 255, 0);
+    color: var(--primary-dark-color);
+}
+.side-navigation .card .nav-link:hover{
+    color: var(--primary-main-color);
+}
+
+.side-navigation .nav-title {
+    font-size: .75rem;
+}
+
+/* Card Styles */
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Styles */
+
+.btn-main {
+    background-color: var(--primary-main-color);
+    color: var(--primary-light-color);
+}
+
+.btn-main:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-light-color);
+}
+
+/* Links Styles */
+
+i,
+a {
+    text-decoration: none;
+}
+
+i:hover {
+    text-decoration: none;
+    color: #007bff;
+}
+
+li {
+    list-style: none;
+}
