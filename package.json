@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "geojson-geometries-lookup": "^0.5.0"
+  }
+}

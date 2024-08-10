@@ -82,10 +82,10 @@
 
                  <!-- Main Content -->
                 <div class="container-fluid">
-                    <div class="row min-vh-100">
-                        <div class="col col-lg-5 col-md-6 p-4">
+                    <div class="row">
+                        <div class="col-lg-5 col-md-6 p-4">
 
-                            <h4 class="">Add Business Center</h4>
+                            <h4 class="fw-bold">Add Business Center</h4>
 
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb breadcrumb-chevron">
@@ -108,7 +108,7 @@
                             </nav>
                             
                             <div class="row">
-                                <form id="addBusinessCenterForm" class="needs-validation" novalidate>
+                                <form class="left-container overflow-y-auto mb-3 needs-validation" id="addBusinessCenterForm" novalidate>
                                     <div class="mb-3">
                                         <label for="locationName" class="form-label">Location Name</label>
                                         <input type="text" class="form-control" id="locationName" placeholder="Enter location name" required>
@@ -117,35 +117,47 @@
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="unit" class="form-label">Unit/Flr #, Bldg Name, Blk or Lot #</label>
-                                        <input type="text" class="form-control" id="unit" placeholder="Enter complete location address" required>
+                                        <label for="municipality" class="form-label">Municipality
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"data-bs-toggle="popover" data-bs-placement="right" 
+                                                data-bs-trigger="hover focus" data-bs-custom-class="custom-popover" data-bs-title="Select Location" 
+                                                data-bs-content="Please select a location on the map.">
+                                            </span>
+                                        </label>
+                                        <input type="text" class="form-control" id="municipality" placeholder="Municipality" autocomplete="cc-exp-month" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="barangay" class="form-label">Barangay 
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"data-bs-toggle="popover" data-bs-placement="right" 
+                                                data-bs-trigger="hover focus" data-bs-custom-class="custom-popover" data-bs-title="Select Location" 
+                                                data-bs-content="Please select a location on the map.">
+                                            </span>
+                                        </label>
+                                        <input type="text" class="form-control" id="barangay" placeholder="Barangay" autocomplete="cc-exp-month" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="street" class="form-label">Street <span class="text-muted">(Optional)</span></label>
+                                        <input type="text" class="form-control" id="street" placeholder="Street" autocomplete="cc-exp-month">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="unit" class="form-label">Unit/Flr #, Bldg Name, Blk or Lot # <span class="text-muted">(Optional)</span></label>
+                                        <input type="text" class="form-control" id="unit" placeholder="Enter complete location address" >
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="mobile" class="form-label">Contact Number</label>
+                                        <input type="tel" class="form-control" id="mobile" placeholder="Enter your a number" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" maxlength="13" required>
                                         <div class="invalid-feedback">
-                                            Please provide complete location address.
+                                            Please provide a contact number (Must be 11 digits long).
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="municipality" class="form-label">Municipality</label>
-                                        <input type="text" class="form-control" id="municipality" placeholder="Municipality" required>
+                                        <label for="additionalMobile" class="form-label">Additional Contact Number <span class="text-muted">(Optional)</span></label>
+                                        <input type="tel" class="form-control" id="additionalMobile" placeholder="Enter your a number" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" maxlength="13">
                                         <div class="invalid-feedback">
-                                            Please select a location on the map.
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="barangay" class="form-label">Barangay</label>
-                                        <input type="text" class="form-control" id="barangay" placeholder="Barangay" required>
-                                        <div class="invalid-feedback">
-                                            Please select a location on the map.
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="street" class="form-label">Street</label>
-                                        <input type="text" class="form-control" id="street" placeholder="Street" required>
-                                        <div class="invalid-feedback">
-                                            Please select a location on the map.
+                                            Contact number must be 11 digits long.
                                         </div>
                                     </div>
                                 
-                                    <button type="submit" class="btn btn-primary">Save Business Center</button>
+                                    <button type="submit" class="btn btn-primary mb-3">Save Business Center</button>
                                 </form>
                             </div>
 
@@ -153,7 +165,7 @@
 
                         <div class="d-flex flex-column col-lg-7 col-md-6 border-start bg-white pb-0">
                             <a class="btn btn-secondary align-self-end m-3 px-4" href="../centers/business-center.html" role="button">Back</a>
-                            <div class="rounded h-75 my-0 mx-3" id="map"></div>
+                            <div class="rounded mb-5 mx-3" id="map"></div>
                         </div>
                     </div>
                 </div>
@@ -164,7 +176,7 @@
 
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
-    <script src="../../resources/js/add-business-center.js" type="module"></script>
+    <script src="../centers/js/add-business-center.js" type="module"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>

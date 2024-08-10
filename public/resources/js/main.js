@@ -60,3 +60,24 @@ async function includeHTML() {
 
 // Call the function on page load
 window.addEventListener('DOMContentLoaded', includeHTML);
+
+// -------------------------------------------------- Enable Bootstrap Popovers
+
+const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+
+// -------------------------------------------------- Mobile Number Input Format
+
+function formatMobileNumber(input) {
+    let value = input.value.replace(/\D/g, ''); 
+    const formattedValue = value
+        .replace(/^(\d{4})(\d{0,3})(\d{0,4})$/, (match, p1, p2, p3) => {
+            let result = p1;
+            if (p2) result += '-' + p2;
+            if (p3) result += '-' + p3;
+            return result;
+        });
+    input.value = formattedValue;
+}
+
+export {formatMobileNumber};
