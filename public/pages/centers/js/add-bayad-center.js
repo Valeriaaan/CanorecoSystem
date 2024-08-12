@@ -1,8 +1,7 @@
-// -------------------------------------------------- Firebase Imports
+ // -------------------------------------------------- Firebase Imports
 
 import { firestore } from '../../../resources/js/config.js';  
 import { collection, addDoc} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-import { formatMobileNumber } from '../../../resources/js/main.js'; 
 import { geocodeLatLng } from '../js/functions-center.js'; 
 
 // -------------------------------------------------- Map and Marker Setup
@@ -38,39 +37,16 @@ function initMap() {
     });
 }
 
-// -------------------------------------------------- Format Mobile Number Inputs
-
-document.getElementById('mobile').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
-
-document.getElementById('additionalMobile').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
-
 // -------------------------------------------------- Form Submission Handling
 
-document.getElementById('addBusinessCenterForm').addEventListener('submit', async function(event) {
+document.getElementById('addBayadCenterForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
     const form = event.target;
 
-    const mobileInput = document.getElementById('mobile');
-    const additionalMobileInput = document.getElementById('additionalMobile');
-    const mobile = mobileInput.value;
-    const additionalMobile = additionalMobileInput.value;
-
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
         return;
-    }
-
-    if (mobile.length !== 13) {
-        Swal.fire('error!', 'mobile', 'error');
-    }
-
-    if (additionalMobile && additionalMobile.length !== 13) {
-        Swal.fire('error!', 'admobile', 'error');
     }
 
     if (!selectedLatLng) {
@@ -86,21 +62,19 @@ document.getElementById('addBusinessCenterForm').addEventListener('submit', asyn
     const unit = document.getElementById('unit').value;
 
     try {
-        await addDoc(collection(firestore, 'business_centers'), {
+        await addDoc(collection(firestore, 'bayad_centers'), {
             locationName: locationName,
             latitude: selectedLatLng.lat(),
             longitude: selectedLatLng.lng(),
             municipality: municipality,
             barangay: barangay,
             street: street,
-            unit: unit,
-            mobile: mobile,
-            additionalMobile: additionalMobile
+            unit: unit
         });
 
         Swal.fire('Saved!', 'The location has been saved.', 'success').then(() => {
             // Reset the form and marker
-            document.getElementById('addBusinessCenterForm').reset();
+            document.getElementById('addBayadCenterForm').reset();
             form.classList.remove('was-validated');
             if (marker) {
                 marker.setMap(null);
@@ -108,11 +82,11 @@ document.getElementById('addBusinessCenterForm').addEventListener('submit', asyn
             }
             selectedLatLng = null;
 
-            window.location.href = 'business-center.html';
+            window.location.href = 'bayad-center.html';
         });
 
     } catch (error) {
         console.error('Error saving document:', error);
-        Swal.fire('Error', 'An error occurred while saving the business center.', 'error');
+        Swal.fire('Error', 'An error occurred while saving the bayad center.', 'error');
     }
 });

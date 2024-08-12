@@ -10,13 +10,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../resources/css/style.css">
-    <title>Edit Business Center</title>
+    <title>Edit Business Center &#8211; CANORECO</title>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
 
     <div class="container-fluid px-0">
         <div class="row gx-0 flex-nowrap">
+
             <!-- Sidebar -->
             <div class="col-auto col-md-3 col-xl-2 px-0 position-sticky sticky-top h-100">
                 <div id="side-nav"></div>
@@ -24,11 +25,13 @@
 
             <!-- Main content and Top App Bar -->
             <div class="col d-flex flex-column">
+
                 <!-- Top App Bar -->
                 <nav class="top-nav navbar navbar-expand-lg border-bottom border-body">
                     <div class="container-fluid">
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
-                            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false"
+                            aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
 
@@ -45,7 +48,7 @@
                                         <li><a class="dropdown-item" href="#">Notification 3</a></li>
                                     </ul>
                                 </li>
-                                
+
                                 <li class="nav-item dropdown me-1">
                                     <a class="nav-link" href="#" id="navbarMessages" role="button"
                                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -61,9 +64,9 @@
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="navbarProfile" role="button"
                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img src="https://github.com/mdo.png" id="userProfilePicture" alt="Profile" width="30" height="30"
-                                            class="rounded-circle">
-                                            <span id="userFullName" class="ms-1 fw-medium"></span>
+                                        <img src="https://github.com/mdo.png" id="userProfilePicture" alt="Profile"
+                                            width="30" height="30" class="rounded-circle">
+                                        <span id="userFullName" class="ms-1 fw-medium"></span>
                                     </a>
 
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarProfile">
@@ -79,8 +82,8 @@
 
                 <!-- Main Content -->
                 <div class="container-fluid">
-                    <div class="row min-vh-100">
-                        <div class="col col-lg-5 col-md-6 p-4">
+                    <div class="row">
+                        <div class="col-lg-5 col-md-6 p-4">
                             <h4 class="fw-bold">Edit Business Center</h4>
 
                             <nav aria-label="breadcrumb">
@@ -104,7 +107,8 @@
                             </nav>
 
                             <div class="row">
-                                <form id="editBusinessCenterForm" class="needs-validation" novalidate>
+                                <form class="left-container overflow-y-auto mb-3 needs-validation" id="editBusinessCenterForm"
+                                    novalidate>
                                     <div class="mb-3">
                                         <label for="locationName" class="form-label">Location Name</label>
                                         <input type="text" class="form-control" id="locationName" placeholder="Enter location name" required>
@@ -113,53 +117,71 @@
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="unit" class="form-label">Unit/Flr #, Bldg Name, Blk or Lot #</label>
-                                        <input type="text" class="form-control" id="unit" placeholder="Enter complete location address" required>
+                                        <label for="municipality" class="form-label">Municipality
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"
+                                                data-bs-toggle="popover" data-bs-placement="right" data-bs-trigger="hover focus" 
+                                                data-bs-custom-class="custom-popover" data-bs-title="Select Location"
+                                                data-bs-content="Please select a location on the map.">
+                                            </span>
+                                        </label>
+                                        <input type="text" class="form-control" id="municipality" placeholder="Municipality" autocomplete="cc-exp-month" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="barangay" class="form-label">Barangay
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"
+                                                data-bs-toggle="popover" data-bs-placement="right" data-bs-trigger="hover focus" 
+                                                data-bs-custom-class="custom-popover" data-bs-title="Select Location"
+                                                data-bs-content="Please select a location on the map.">
+                                            </span>
+                                        </label>
+                                        <input type="text" class="form-control" id="barangay" placeholder="Barangay" autocomplete="cc-exp-month" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="street" class="form-label">Street <span class="text-muted">(Optional)</span></label>
+                                        <input type="text" class="form-control" id="street" placeholder="Street" autocomplete="cc-exp-month">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="unit" class="form-label">Unit/Flr #, Bldg Name, Blk or Lot # <span class="text-muted">(Optional)</span></label>
+                                        <input type="text" class="form-control" id="unit" placeholder="Enter complete location address">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="mobile" class="form-label">Contact Number</label>
+                                        <input type="tel" class="form-control" id="mobile" placeholder="Enter your number" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" maxlength="13" required>
                                         <div class="invalid-feedback">
-                                            Please provide complete location address.
+                                            Please provide a contact number (Must be 11 digits long).
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="municipality" class="form-label">Municipality</label>
-                                        <input type="text" class="form-control" id="municipality" placeholder="Municipality" required>
+                                        <label for="additionalMobile" class="form-label">Additional Contact Number <span class="text-muted">(Optional)</span></label>
+                                        <input type="tel" class="form-control" id="additionalMobile" placeholder="Enter your number" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" maxlength="13">
                                         <div class="invalid-feedback">
-                                            Please select a location on the map.
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="barangay" class="form-label">Barangay</label>
-                                        <input type="text" class="form-control" id="barangay" placeholder="Barangay" required>
-                                        <div class="invalid-feedback">
-                                            Please select a location on the map.
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="street" class="form-label">Street</label>
-                                        <input type="text" class="form-control" id="street" placeholder="Street" required>
-                                        <div class="invalid-feedback">
-                                            Please select a location on the map.
+                                            Contact number must be 11 digits long.
                                         </div>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary">Update Business Center</button>
+                                    <button type="submit" class="btn btn-main mb-3">Update Business Center</button>
                                 </form>
                             </div>
 
                         </div>
 
                         <div class="d-flex flex-column col-lg-7 col-md-6 border-start bg-white pb-0">
-                            <a class="btn btn-secondary align-self-end m-3 px-4" href="../centers/business-center.html" role="button">Back</a>
-                            <div class="rounded h-75 my-0 mx-3" id="map"></div>
+                            <a class="btn btn-secondary align-self-end m-3 px-4"
+                                href="../centers/business-center.html" role="button">Back</a>
+                            <div class="rounded mb-5 mx-3" id="map"></div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
+    <script src="../centers/js/functions-center.js" type="module"></script>
     <script src="../centers/js/edit-business-center.js" type="module"></script>
+    
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>

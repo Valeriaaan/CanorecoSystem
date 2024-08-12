@@ -80,4 +80,4 @@ function formatMobileNumber(input) {
     input.value = formattedValue;
 }
 
-export {formatMobileNumber};
+export { formatMobileNumber };

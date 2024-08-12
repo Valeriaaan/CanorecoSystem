@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html> 
+<html>
 
 <head>
     <meta charset="UTF-8" />
@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../resources/css/style.css">
-    <title>Add Bayad Center &#8211; CANORECO</title>
+    <title>Edit Bayad Center &#8211; CANORECO</title>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -29,9 +29,9 @@
                 <!-- Top App Bar -->
                 <nav class="top-nav navbar navbar-expand-lg border-bottom border-body">
                     <div class="container-fluid">
-
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
-                            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false"
+                            aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
 
@@ -48,7 +48,7 @@
                                         <li><a class="dropdown-item" href="#">Notification 3</a></li>
                                     </ul>
                                 </li>
-                                
+
                                 <li class="nav-item dropdown me-1">
                                     <a class="nav-link" href="#" id="navbarMessages" role="button"
                                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -64,9 +64,9 @@
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="navbarProfile" role="button"
                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img src="https://github.com/mdo.png" id="userProfilePicture" alt="Profile" width="30" height="30"
-                                            class="rounded-circle">
-                                            <span id="userFullName" class="ms-1 fw-medium"></span>
+                                        <img src="https://github.com/mdo.png" id="userProfilePicture" alt="Profile"
+                                            width="30" height="30" class="rounded-circle">
+                                        <span id="userFullName" class="ms-1 fw-medium"></span>
                                     </a>
 
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarProfile">
@@ -80,12 +80,11 @@
                     </div>
                 </nav>
 
-                 <!-- Main Content -->
+                <!-- Main Content -->
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-5 col-md-6 p-4">
-
-                            <h4 class="fw-bold">Add Bayad Center</h4>
+                            <h4 class="fw-bold">Edit Bayad Center</h4>
 
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb breadcrumb-chevron">
@@ -102,13 +101,14 @@
                                             href="../centers/bayad-center.html">Bayad Center</a>
                                     </li>
                                     <li class="breadcrumb-item active" aria-current="page">
-                                        Add Bayad Center
+                                        Edit Bayad Center
                                     </li>
                                 </ol>
                             </nav>
-                            
+
                             <div class="row">
-                                <form class="left-container overflow-y-auto mb-3 needs-validation" id="addBayadCenterForm" novalidate>
+                                <form class="left-container overflow-y-auto mb-3 needs-validation" id="editBayadCenterForm"
+                                    novalidate>
                                     <div class="mb-3">
                                         <label for="locationName" class="form-label">Location Name</label>
                                         <input type="text" class="form-control" id="locationName" placeholder="Enter location name" required>
@@ -118,17 +118,19 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="municipality" class="form-label">Municipality
-                                            <span class="far fa-circle-question fa-sm text-muted ms-1"data-bs-toggle="popover" data-bs-placement="right" 
-                                                data-bs-trigger="hover focus" data-bs-custom-class="custom-popover" data-bs-title="Select Location" 
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"
+                                                data-bs-toggle="popover" data-bs-placement="right" data-bs-trigger="hover focus" 
+                                                data-bs-custom-class="custom-popover" data-bs-title="Select Location"
                                                 data-bs-content="Please select a location on the map.">
                                             </span>
                                         </label>
                                         <input type="text" class="form-control" id="municipality" placeholder="Municipality" autocomplete="cc-exp-month" readonly>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="barangay" class="form-label">Barangay 
-                                            <span class="far fa-circle-question fa-sm text-muted ms-1"data-bs-toggle="popover" data-bs-placement="right" 
-                                                data-bs-trigger="hover focus" data-bs-custom-class="custom-popover" data-bs-title="Select Location" 
+                                        <label for="barangay" class="form-label">Barangay
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"
+                                                data-bs-toggle="popover" data-bs-placement="right" data-bs-trigger="hover focus" 
+                                                data-bs-custom-class="custom-popover" data-bs-title="Select Location"
                                                 data-bs-content="Please select a location on the map.">
                                             </span>
                                         </label>
@@ -140,29 +142,32 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="unit" class="form-label">Unit/Flr #, Bldg Name, Blk or Lot # <span class="text-muted">(Optional)</span></label>
-                                        <input type="text" class="form-control" id="unit" placeholder="Enter complete location address" >
+                                        <input type="text" class="form-control" id="unit" placeholder="Enter complete location address">
                                     </div>
-                                
-                                    <button type="submit" class="btn btn-main mb-3">Save Bayad Center</button>
+
+                                    <button type="submit" class="btn btn-main mb-3">Update Bayad Center</button>
                                 </form>
                             </div>
 
                         </div>
 
                         <div class="d-flex flex-column col-lg-7 col-md-6 border-start bg-white pb-0">
-                            <a class="btn btn-secondary align-self-end m-3 px-4" href="../centers/bayad-center.html" role="button">Back</a>
+                            <a class="btn btn-secondary align-self-end m-3 px-4"
+                                href="../centers/bayad-center.html" role="button">Back</a>
                             <div class="rounded mb-5 mx-3" id="map"></div>
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
     </div>
 
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
-    <script src="../centers/js/add-bayad-center.js" type="module"></script>
+    <script src="../centers/js/functions-center.js" type="module"></script>
+    <script src="../centers/js/edit-Bayad-center.js" type="module"></script>
+    
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>
@@ -172,7 +177,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3tKIFW5fz6j-ED1kFVD_VY7RRtGRDQtQ&loading=async&callback=initMap" async defer></script>
-
 </body>
 
 </html>

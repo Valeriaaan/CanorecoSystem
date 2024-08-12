@@ -3,7 +3,7 @@
 import { firestore } from '../../../resources/js/config.js';
 import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-const locationsCollection = collection(firestore, 'business_centers');
+const locationsCollection = collection(firestore, 'bayad_centers');
 
 // -------------------------------------------------- Map and Marker Setup
 
@@ -29,7 +29,7 @@ window.initMap = async () => {
 };
 
 function addMarker(location, id) {
-    const bayadCenterIcon = '../../resources/images/business-center-icon.png'; 
+    const bayadCenterIcon = '../../resources/images/payment-center-icon.png'; 
 
     const marker = new google.maps.Marker({
         position: { lat: location.latitude, lng: location.longitude },
@@ -37,7 +37,7 @@ function addMarker(location, id) {
         title: location.locationName,
         icon: {
             url: bayadCenterIcon,
-            scaledSize: new google.maps.Size(64, 42) 
+            scaledSize: new google.maps.Size(64, 77) 
         }
     });
     markers.push(marker);
@@ -133,10 +133,8 @@ function addLocationToCard(location, id) {
                 <h5 class="card-title fw-bold">${location.locationName}</h5>
                 <p class="text-muted mb-0 mt-2"><i class="fas fa-globe fa-sm me-2"></i>${location.latitude}, ${location.latitude}</p>
                 <p class="text-muted mb-0 mt-2"><i class="fas fa-location-dot fa-sm me-2"></i>${location.municipality}, ${location.barangay}, ${location.street}, ${location.unit}</p>
-                <p class="text-muted mb-0 mt-2"><i class="fas fa-phone fa-sm me-2"></i>${location.mobile} / ${location.additionalMobile}</p>
-            </div>
             <div class="d-flex gap-2 p-2">
-                <a href="edit-business-center.html?id=${id}" class="btn btn-sm btn-outline-primary w-50">Edit</a>
+                <a href="edit-bayad-center.html?id=${id}" class="btn btn-sm btn-outline-primary w-50">Edit</a>
                 <button type="button" class="btn btn-sm btn-outline-danger w-50" onclick="confirmDeleteLocation('${id}', '${location.locationName}')">Delete</button>
             </div>
         </div>
@@ -181,7 +179,7 @@ window.confirmDeleteLocation = async (id, name) => {
 
 async function deleteLocation(id) {
     try {
-        const locationDoc = doc(firestore, 'business_centers', id);
+        const locationDoc = doc(firestore, 'bayad_centers', id);
         await deleteDoc(locationDoc);
         Swal.fire('Deleted!', 'The location has been deleted.', 'success');
         window.initMap(); 

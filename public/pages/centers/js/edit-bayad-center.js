@@ -2,7 +2,6 @@
 
 import { firestore } from '../../../resources/js/config.js';  
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-import { formatMobileNumber } from '../../../resources/js/main.js'; 
 import { geocodeLatLng } from '../js/functions-center.js'; 
 
 // -------------------------------------------------- Map and Marker Setup
@@ -10,7 +9,7 @@ import { geocodeLatLng } from '../js/functions-center.js';
 let map;
 let marker;
 let selectedLatLng = null;  
-let businessCenterId = null;  // Store the business center ID for updating
+let bayadCenterId = null;  // Store the Bayad center ID for updating
 
 window.initMap = initMap;
 
@@ -38,34 +37,30 @@ async function initMap() {
         geocodeLatLng(clickedLocation);
     });
 
-    // Load business center data if an ID is provided
+    // Load Bayad center data if an ID is provided
     const urlParams = new URLSearchParams(window.location.search);
-    businessCenterId = urlParams.get('id');
+    bayadCenterId = urlParams.get('id');
 
-    if (businessCenterId) {
-        await loadBusinessCenterData(businessCenterId);
+    if (bayadCenterId) {
+        await loadBayadCenterData(bayadCenterId);
     }
 }
 
-// -------------------------------------------------- Load Existing Business Center Data
+// -------------------------------------------------- Load Existing Bayad Center Data
 
-async function loadBusinessCenterData(id) {
-    const docRef = doc(firestore, 'business_centers', id);
+async function loadBayadCenterData(id) {
+    const docRef = doc(firestore, 'bayad_centers', id);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
         const data = docSnap.data();
 
-        // Populate form fields with existing data
         document.getElementById('locationName').value = data.locationName || '';
         document.getElementById('municipality').value = data.municipality || '';
         document.getElementById('barangay').value = data.barangay || '';
         document.getElementById('street').value = data.street || '';
         document.getElementById('unit').value = data.unit || '';
-        document.getElementById('mobile').value = data.mobile || '';
-        document.getElementById('additionalMobile').value = data.additionalMobile || '';
 
-        // Set the marker on the map
         const latLng = { lat: data.latitude, lng: data.longitude };
         selectedLatLng = latLng;
         marker = new google.maps.Marker({
@@ -75,43 +70,20 @@ async function loadBusinessCenterData(id) {
         });
         map.setCenter(latLng);
     } else {
-        Swal.fire('Error', 'Business center not found.', 'error');
+        Swal.fire('Error', 'Bayad center not found.', 'error');
     }
 }
 
-// -------------------------------------------------- Format Mobile Number Inputs
-
-document.getElementById('mobile').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
-
-document.getElementById('additionalMobile').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
-
 // -------------------------------------------------- Form Submission Handling
 
-document.getElementById('editBusinessCenterForm').addEventListener('submit', async function(event) {
+document.getElementById('editBayadCenterForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
     const form = event.target;
 
-    // Validate mobile numbers
-    const mobileInput = document.getElementById('mobile');
-    const additionalMobileInput = document.getElementById('additionalMobile');
-    const mobile = mobileInput.value;
-    const additionalMobile = additionalMobileInput.value;
-
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
         return;
-    }
-    if (mobile.length !== 13) {
-        Swal.fire('error!', 'mobile', 'error');
-    }
-
-    if (additionalMobile && additionalMobile.length !== 13) {
-        Swal.fire('error!', 'admobile', 'error');
     }
 
     if (!selectedLatLng) {
@@ -126,26 +98,24 @@ document.getElementById('editBusinessCenterForm').addEventListener('submit', asy
     const unit = document.getElementById('unit').value;
 
     try {
-        const docRef = doc(firestore, 'business_centers', businessCenterId);
-
+        const docRef = doc(firestore, 'bayad_centers', bayadCenterId);
+        
        const latitude = typeof selectedLatLng.lat === 'function' ? selectedLatLng.lat() : selectedLatLng.lat;
        const longitude = typeof selectedLatLng.lng === 'function' ? selectedLatLng.lng() : selectedLatLng.lng;
 
-       await updateDoc(docRef, {
-           locationName: locationName,
-           latitude: latitude,
-           longitude: longitude,
-           municipality: municipality,
-           barangay: barangay,
-           street: street,
-           unit: unit,
-           mobile: mobile,
-           additionalMobile: additionalMobile
-       });
+        await updateDoc(docRef, {
+            locationName: locationName,
+            latitude: latitude,
+            longitude: longitude,
+            municipality: municipality,
+            barangay: barangay,
+            street: street,
+            unit: unit
+        });
 
         Swal.fire('Updated!', 'The location has been updated.', 'success').then(() => {
             // Reset the form and marker
-            document.getElementById('editBusinessCenterForm').reset();
+            document.getElementById('editBayadCenterForm').reset();
             form.classList.remove('was-validated');
             if (marker) {
                 marker.setMap(null);
@@ -153,12 +123,12 @@ document.getElementById('editBusinessCenterForm').addEventListener('submit', asy
             }
             selectedLatLng = null;
 
-            window.location.href = 'business-center.html';
+            window.location.href = 'bayad-center.html';
         });
 
 
     } catch (error) {
         console.error('Error updating document:', error);
-        Swal.fire('Error', 'An error occurred while updating the business center.', 'error');
+        Swal.fire('Error', 'An error occurred while updating the Bayad center.', 'error');
     }
 });
