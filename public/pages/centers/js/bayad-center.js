@@ -95,7 +95,6 @@ function updateLocationsDisplay(filteredLocations) {
     updateLocationCount(filteredLocations.length);
 }
 
-
 function filterLocations() {
     const searchInput = document.getElementById('searchInput').value.toLowerCase();
     const municipalityFilter = document.getElementById('municipalityFilter').value;

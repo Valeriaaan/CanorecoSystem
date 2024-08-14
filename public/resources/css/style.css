@@ -84,6 +84,12 @@ body {
     transform: scale(1.02); 
 }
 
+.news-card:hover {
+    background-color: var(--background-color); 
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transform: scale(1.000001); 
+}
+
 /* Button Styles */
 
 .btn-main {

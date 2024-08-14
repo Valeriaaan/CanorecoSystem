@@ -21,7 +21,7 @@ async function displayUserDetails(uid) {
 
         if (userDocSnapshot.exists()) {
             const userData = userDocSnapshot.data();
-            document.getElementById('userFullName').textContent = userData.fullName;
+            document.getElementById('userFullName').textContent = userData.firstName + ' ' +userData.lastName;
             document.getElementById('userProfilePicture').src = userData.profilePicture;
         } else {
             console.error('No user data found');
