@@ -114,11 +114,50 @@
                             <div class="card px-2">
                                 <div class="card-body">
                                    
-                                    
+                                    <form id="addNewsForm" class="needs-validation mt-4" novalidate>
+                                        <div class="mb-3">
+                                            <label for="newsTitle" class="form-label">News Title</label>
+                                            <input type="text" class="form-control" id="newsTitle" placeholder="Enter news title" required>
+                                            <div class="invalid-feedback">
+                                                Please provide a title.
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="newsCategory" class="form-label">Category</label>
+                                            <select class="form-select" id="newsCategory" required>
+                                                <option value="" selected disabled>Select category</option>
+                                                <option value="Billing Rates">Billing Rates</option>
+                                                <option value="CANORECO Advisories">CANORECO Advisories</option>
+                                                <option value="CANORECO Balita">CANORECO Balita</option>
+                                                <option value="COOP Activities">COOP Activities</option>
+                                                <option value="Emergency Power Service Interruptions">Emergency Power Service Interruptions</option>
+                                                <option value="Invitation to Bid">Invitation to Bid</option>
+                                                <option value="Maintenance Activities">Maintenance Activities</option>
+                                                <option value="Notice of Vacancy">Notice of Vacancy</option>
+                                                <option value="Patalastas ng Power Interruption">Patalastas ng Power Interruption</option>
+                                                <option value="Schedules">Schedules</option>
+                                                <option value="Uncategorized">Uncategorized</option>
+                                                <option value="Consumer Complaints">Consumer Complaints</option>
+                                            </select>
+                                            <div class="invalid-feedback">
+                                                Please select a category.
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="newsContent" class="form-label">Content</label>
+                                            <textarea class="form-control" id="newsContent" rows="5" placeholder="Enter news content" required></textarea>
+                                            <div class="invalid-feedback">
+                                                Please provide news content.
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-main">Add News</button>
+                                    </form>
+
                                 </div>
                             </div>
                         </div>
-                        
+                         
                         <!-- News Selection Container -->
                         <div class="col-lg-4 col-md-6 mt-4 mt-lg-0">
                             <div class="card px-2">
@@ -138,6 +177,7 @@
 
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
+    <script src="../news/js/add-news.js" type="module"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>

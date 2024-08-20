@@ -117,6 +117,18 @@ li {
     list-style: none;
 }
 
+#newsMenu .active {
+    background-color: var(--primary-main-color);
+    
+}
+
+#newsMenu .active:hover {
+    color: var(--light-color);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transform: scale(1.01); 
+    
+}
+
 /* Left and Map */
 
 #map {

@@ -3,17 +3,26 @@
 import { firestore } from '../../../resources/js/config.js';
 import { collection, getDocs, doc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
+let currentPage = 1;
+let totalPages = 1;
+const newsPerPage = 5;
+const loadedNewsIds = new Set(); // Track loaded news IDs to prevent duplicates
+
 loadNewsCards();
 setupCategoryFilters();
+setupPaginationControls();
+setupSearchBar();
 
-// -------------------------------------------------- Fetch News
+// -------------------------------------------------- Fetch News with Pagination
 
-async function loadNewsCards(categoryFilter = '') {
+async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
     const newsContainer = document.getElementById("newsContainer");
     const emptyState = document.getElementById("emptyState");
+    const newsCountElement = document.querySelector(".news-count");
 
-    // Clear existing news cards
+    // Clear the news container and reset the Set of loaded IDs
     newsContainer.innerHTML = '';
+    loadedNewsIds.clear();
 
     try {
         let q;
@@ -24,52 +33,42 @@ async function loadNewsCards(categoryFilter = '') {
         }
 
         const querySnapshot = await getDocs(q);
+        const totalNews = querySnapshot.size;
+        totalPages = Math.ceil(totalNews / newsPerPage); // Update totalPages
 
-        if (querySnapshot.empty) {
+        const startIndex = (page - 1) * newsPerPage;
+        const endIndex = startIndex + newsPerPage;
+
+        const newsArray = [];
+
+        querySnapshot.forEach((docSnapshot) => {
+            const newsData = { id: docSnapshot.id, ...docSnapshot.data() };
+            if (!searchTerm || newsData.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+                // Only add if the news ID is not already processed
+                if (!loadedNewsIds.has(newsData.id)) {
+                    newsArray.push(newsData);
+                    loadedNewsIds.add(newsData.id); // Track the ID to prevent duplication
+                }
+            }
+        });
+
+        const paginatedNews = newsArray.slice(startIndex, endIndex);
+
+        // Update the news count display
+        const displayStart = startIndex + 1;
+        const displayEnd = Math.min(endIndex, newsArray.length);
+        newsCountElement.textContent = `${displayStart}-${displayEnd} of ${newsArray.length}`;
+
+        if (paginatedNews.length === 0) {
             emptyState.style.display = 'block';
         } else {
             emptyState.style.display = 'none';
-
-            querySnapshot.forEach((docSnapshot) => {
-                const news = docSnapshot.data();
-                const docId = docSnapshot.id;
-
-                const newsCard = document.createElement("div");
-                newsCard.classList.add("news-card", "border-bottom", "mb-1", "p-2");
-
-                newsCard.innerHTML = `
-                    <div class="card-body position-relative">
-                        <!-- Category Chip -->
-                        <span class="badge bg-primary position-absolute top-0 start-0 m-3" id="newsCategory">${news.category}</span>
-                        
-                        <!-- Meatball Menu -->
-                        <div class="dropdown position-absolute top-0 end-0 m-3">
-                            <button class="btn btn-link text-secondary p-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                <li><a class="dropdown-item edit-item" href="#">Edit</a></li>
-                                <li><a class="dropdown-item delete-item" href="#">Delete</a></li>
-                            </ul>
-                        </div>
-                    
-                        <!-- Card Title -->
-                        <h5 class="card-title mt-4 pt-2" id="newsTitle">${news.title}</h5>
-                        
-                        <!-- Card Description -->
-                        <p class="card-text" id="newsDescription">${news.description}</p>
-                    </div>
-                    
-                    <!-- Card Footer with Date -->
-                    <div class="card-footer bg-transparent border-0 text-end">
-                        <small class="text-muted" id="newsDate">${news.date}</small>
-                    </div>
-                `;
-
-                newsContainer.appendChild(newsCard);
-                deleteNews(newsCard, docId);
+            paginatedNews.forEach((news) => {
+                renderNewsCard(news, newsContainer);
             });
         }
+
+        updatePaginationControls(newsArray.length, page);
 
     } catch (error) {
         console.error("Error fetching news: ", error);
@@ -77,43 +76,125 @@ async function loadNewsCards(categoryFilter = '') {
     }
 }
 
-// -------------------------------------------------- Delete News
+function renderNewsCard(news, container) {
+    const docId = news.id;
 
-function deleteNews(newsCard, docId) {
-    const deleteButton = newsCard.querySelector(".delete-item");
-    const newsContainer = document.getElementById("newsContainer");
-    const emptyState = document.getElementById("emptyState");
+    // Format timestamp
+    const date = news.timestamp.toDate();
+    const formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        day: 'numeric',
+        month: 'long'
+    });
 
-    deleteButton.addEventListener("click", async () => {
-        const { isConfirmed } = await Swal.fire({
-            title: 'Are you sure?',
-            text: 'You won\'t be able to revert this!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel',  
-            confirmButtonColor: "#dc3545",
-            cancelButtonColor: "#6c757d",
-            reverseButtons: true
-        });
+    // Trim content to 150 characters
+    const trimmedContent = news.content.length > 150 ? news.content.substring(0, 150) + '...' : news.content;
 
-        if (isConfirmed) {
-            try {
-                await deleteDoc(doc(firestore, "news", docId));
-                newsCard.remove();
+    const newsCard = document.createElement("div");
+    newsCard.classList.add("news-card", "border-bottom", "mb-1", "p-2");
 
-                if (newsContainer.children.length === 0) {
-                    emptyState.style.display = 'block';
-                }
+    newsCard.innerHTML = `
+        <div class="card-body position-relative">
+            <span class="badge bg-primary position-absolute top-0 start-0 m-3">${news.category}</span>
+            <div class="dropdown position-absolute top-0 end-0 m-3">
+                <button class="btn btn-link text-secondary p-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item edit-item" href="#">Edit</a></li>
+                    <li><a class="dropdown-item delete-item" href="#">Delete</a></li>
+                </ul>
+            </div>
+            <h5 class="card-title mt-4 pt-2">${news.title}</h5>
+            <p class="card-text">${trimmedContent}</p>
+        </div>
+        <div class="card-footer bg-transparent border-0 text-end">
+            <small class="text-muted">Posted on <span class="fw-medium">${formattedDate}</span></small>
+        </div>
+    `;
 
-                Swal.fire('Deleted!', 'The news has been deleted.', 'success');
-                
-            } catch (error) {
-                console.error("Error deleting document: ", error);
-                Swal.fire('Error!', 'There was an error deleting the news.', 'error');
-            }
+    container.appendChild(newsCard);
+    deleteNews(newsCard, docId);
+}
+
+// -------------------------------------------------- Pagination Controls
+
+function setupPaginationControls() {
+    const prevPage = document.getElementById("prevPage");
+    const nextPage = document.getElementById("nextPage");
+
+    prevPage.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            const selectedCategory = document.querySelector("#newsMenu .nav-link.active")?.textContent.trim() || '';
+            const searchTerm = document.getElementById("searchInput").value;
+            loadNewsCards(selectedCategory, currentPage, searchTerm);
         }
     });
+
+    nextPage.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (currentPage < totalPages) {
+            currentPage++;
+            const selectedCategory = document.querySelector("#newsMenu .nav-link.active")?.textContent.trim() || '';
+            const searchTerm = document.getElementById("searchInput").value;
+            loadNewsCards(selectedCategory, currentPage, searchTerm);
+        }
+    });
+}
+
+function updatePaginationControls(totalNews, page) {
+    totalPages = Math.ceil(totalNews / newsPerPage); // Ensure totalPages is updated
+
+    const paginationControls = document.getElementById("paginationControls");
+    const currentPageElement = document.getElementById("currentPage");
+
+    // Update current page number display
+    currentPageElement.textContent = page;
+
+    // Clear existing pagination buttons
+    paginationControls.querySelectorAll('.page-number').forEach(item => item.remove());
+
+    // Calculate start and end page numbers
+    let startPage = Math.max(1, page - 1);
+    let endPage = Math.min(totalPages, page + 1);
+
+    // Adjust start and end page for edge cases
+    if (page === 1) {
+        endPage = Math.min(totalPages, page + 2);
+    } else if (page === totalPages) {
+        startPage = Math.max(1, page - 2);
+    }
+
+    // Create page number buttons
+    for (let i = startPage; i <= endPage; i++) {
+        const pageItem = document.createElement("li");
+        pageItem.classList.add("page-item");
+        if (i === page) {
+            pageItem.classList.add("active");
+        }
+
+        const pageLink = document.createElement("a");
+        pageLink.classList.add("page-link", "page-number");
+        pageLink.href = "#";
+        pageLink.textContent = i;
+
+        pageLink.addEventListener("click", (event) => {
+            event.preventDefault();
+            currentPage = i;
+            const selectedCategory = document.querySelector("#newsMenu .nav-link.active")?.textContent.trim() || '';
+            const searchTerm = document.getElementById("searchInput").value;
+            loadNewsCards(selectedCategory, currentPage, searchTerm);
+        });
+
+        pageItem.appendChild(pageLink);
+        paginationControls.insertBefore(pageItem, nextPage.parentNode);
+    }
+
+    // Enable or disable pagination buttons
+    prevPage.classList.toggle("disabled", page <= 1);
+    nextPage.classList.toggle("disabled", page >= totalPages);
 }
 
 // -------------------------------------------------- Setup Category Filters
@@ -125,32 +206,80 @@ function setupCategoryFilters() {
         link.addEventListener("click", (event) => {
             event.preventDefault();
             const selectedCategory = link.textContent.trim();
-            loadNewsCards(selectedCategory);
+            
+            // Reset to the first page when changing categories
+            currentPage = 1;
+
+            const searchTerm = document.getElementById("searchInput").value;
+            loadNewsCards(selectedCategory, currentPage, searchTerm);
             categoryLinks.forEach(l => l.classList.remove("active"));
             link.classList.add("active");
         });
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Select all category links
-    const categoryLinks = document.querySelectorAll('#newsMenu a');
+// -------------------------------------------------- Setup Search Bar
 
-    // Get the header element
+function setupSearchBar() {
+    const searchInput = document.getElementById("searchInput");
+
+    searchInput.addEventListener("input", () => {
+        clearTimeout(searchInput.searchTimeout);
+        searchInput.searchTimeout = setTimeout(() => {
+            const searchTerm = searchInput.value;
+            const selectedCategory = document.querySelector("#newsMenu .nav-link.active")?.textContent.trim() || '';
+            loadNewsCards(selectedCategory, 1, searchTerm);
+        }, 300);
+    });
+}
+
+// -------------------------------------------------- Handle Header Update
+
+document.addEventListener("DOMContentLoaded", () => {
+    const categoryLinks = document.querySelectorAll("#newsMenu .nav-link");
     const newsHeader = document.getElementById('newsHeader');
 
-    // Add click event listeners to each link
     categoryLinks.forEach(link => {
-        link.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default link behavior
-
-            // Get the category from the data attribute
-            const category = this.getAttribute('data-category');
-
-            // Update the header text based on the selected category
-            if (category) {
-                newsHeader.textContent = category;
-            }
+        link.addEventListener("click", (event) => {
+            event.preventDefault();
+            const selectedCategory = link.textContent.trim();
+            newsHeader.textContent = selectedCategory + " News";
         });
     });
 });
+
+// -------------------------------------------------- Delete News
+
+function deleteNews(newsCard, docId) {
+    const deleteButton = newsCard.querySelector('.delete-item');
+    deleteButton.addEventListener('click', async () => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await deleteDoc(doc(firestore, "news", docId));
+                newsCard.remove();
+                Swal.fire('Deleted!', 'The news item has been deleted.', 'success');
+
+                // Check if the newsContainer is empty
+                const newsContainer = document.getElementById("newsContainer");
+                const emptyState = document.getElementById("emptyState");
+
+                if (newsContainer.children.length === 0) {
+                    emptyState.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Error deleting document: ", error);
+                Swal.fire('Error!', 'There was an error deleting the news item.', 'error');
+            }
+        }
+    });
+}
