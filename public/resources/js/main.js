@@ -80,4 +80,25 @@ function formatMobileNumber(input) {
     input.value = formattedValue;
 }
 
-export { formatMobileNumber };
+// -------------------------------------------------- Format Date and Time
+
+function formatDate(UNIX_timestamp) {
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var formattedDate = month + ' ' + date + ', ' + year;
+    return formattedDate;
+}
+
+function formatTime(UNIX_timestamp) {
+    var a = new Date(UNIX_timestamp * 1000);
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var formattedTime = hour + ':' + (min < 10 ? '0' + min : min) + ':' + (sec < 10 ? '0' + sec : sec);
+    return formattedTime;
+}
+
+export { formatMobileNumber , formatDate, formatTime };

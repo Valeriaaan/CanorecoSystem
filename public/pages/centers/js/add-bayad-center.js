@@ -61,32 +61,48 @@ document.getElementById('addBayadCenterForm').addEventListener('submit', async f
     const street = document.getElementById('street').value;
     const unit = document.getElementById('unit').value;
 
-    try {
-        await addDoc(collection(firestore, 'bayad_centers'), {
-            locationName: locationName,
-            latitude: selectedLatLng.lat(),
-            longitude: selectedLatLng.lng(),
-            municipality: municipality,
-            barangay: barangay,
-            street: street,
-            unit: unit
-        });
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to save this Bayad Center?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Save',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: "#4e73df",
+        cancelButtonColor: "#6c757d",
+        reverseButtons: true
 
-        Swal.fire('Saved!', 'The location has been saved.', 'success').then(() => {
-            // Reset the form and marker
-            document.getElementById('addBayadCenterForm').reset();
-            form.classList.remove('was-validated');
-            if (marker) {
-                marker.setMap(null);
-                marker = null;
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                await addDoc(collection(firestore, 'bayad_centers'), {
+                    locationName: locationName,
+                    latitude: selectedLatLng.lat(),
+                    longitude: selectedLatLng.lng(),
+                    municipality: municipality,
+                    barangay: barangay,
+                    street: street,
+                    unit: unit
+                });
+
+                Swal.fire('Saved!', 'The location has been saved.', 'success').then(() => {
+                    // Reset the form and marker
+                    document.getElementById('addBayadCenterForm').reset();
+                    form.classList.remove('was-validated');
+                    if (marker) {
+                        marker.setMap(null);
+                        marker = null;
+                    }
+                    selectedLatLng = null;
+
+                    window.location.href = 'bayad-center.html';
+                });
+
+            } catch (error) {
+                console.error('Error saving document:', error);
+                Swal.fire('Error', 'An error occurred while saving the bayad center.', 'error');
             }
-            selectedLatLng = null;
-
-            window.location.href = 'bayad-center.html';
-        });
-
-    } catch (error) {
-        console.error('Error saving document:', error);
-        Swal.fire('Error', 'An error occurred while saving the bayad center.', 'error');
-    }
+        }
+    });
 });

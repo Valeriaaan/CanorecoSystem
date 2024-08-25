@@ -66,11 +66,13 @@ document.getElementById('addBusinessCenterForm').addEventListener('submit', asyn
     }
 
     if (mobile.length !== 13) {
-        Swal.fire('error!', 'mobile', 'error');
+        Swal.fire('Error!', 'The mobile number must be 13 characters long.', 'error');
+        return;
     }
 
     if (additionalMobile && additionalMobile.length !== 13) {
-        Swal.fire('error!', 'admobile', 'error');
+        Swal.fire('Error!', 'The additional mobile number must be 13 characters long.', 'error');
+        return;
     }
 
     if (!selectedLatLng) {
@@ -85,34 +87,50 @@ document.getElementById('addBusinessCenterForm').addEventListener('submit', asyn
     const street = document.getElementById('street').value;
     const unit = document.getElementById('unit').value;
 
-    try {
-        await addDoc(collection(firestore, 'business_centers'), {
-            locationName: locationName,
-            latitude: selectedLatLng.lat(),
-            longitude: selectedLatLng.lng(),
-            municipality: municipality,
-            barangay: barangay,
-            street: street,
-            unit: unit,
-            mobile: mobile,
-            additionalMobile: additionalMobile
-        });
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to save this Business Center?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Save',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: "#4e73df",
+        cancelButtonColor: "#6c757d",
+        reverseButtons: true
 
-        Swal.fire('Saved!', 'The location has been saved.', 'success').then(() => {
-            // Reset the form and marker
-            document.getElementById('addBusinessCenterForm').reset();
-            form.classList.remove('was-validated');
-            if (marker) {
-                marker.setMap(null);
-                marker = null;
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                await addDoc(collection(firestore, 'business_centers'), {
+                    locationName: locationName,
+                    latitude: selectedLatLng.lat(),
+                    longitude: selectedLatLng.lng(),
+                    municipality: municipality,
+                    barangay: barangay,
+                    street: street,
+                    unit: unit,
+                    mobile: mobile,
+                    additionalMobile: additionalMobile
+                });
+
+                Swal.fire('Saved!', 'The location has been saved.', 'success').then(() => {
+                    // Reset the form and marker
+                    document.getElementById('addBusinessCenterForm').reset();
+                    form.classList.remove('was-validated');
+                    if (marker) {
+                        marker.setMap(null);
+                        marker = null;
+                    }
+                    selectedLatLng = null;
+
+                    window.location.href = 'business-center.html';
+                });
+
+            } catch (error) {
+                console.error('Error saving document:', error);
+                Swal.fire('Error', 'An error occurred while saving the business center.', 'error');
             }
-            selectedLatLng = null;
-
-            window.location.href = 'business-center.html';
-        });
-
-    } catch (error) {
-        console.error('Error saving document:', error);
-        Swal.fire('Error', 'An error occurred while saving the business center.', 'error');
-    }
+        } 
+    });
 });

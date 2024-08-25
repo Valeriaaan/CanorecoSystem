@@ -8,6 +8,14 @@
     ],
     "rewrites": [
       {
+        "source": "/pages/news",
+        "destination": "/pages/news/news.html"
+      },
+      {
+        "source": "/pages/dashboard",
+        "destination": "/pages/dashboard/index.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

@@ -31,6 +31,7 @@ window.initMap = async () => {
 function addMarker(location, id) {
     const bayadCenterIcon = '../../resources/images/business-center-icon.png'; 
 
+
     const marker = new google.maps.Marker({
         position: { lat: location.latitude, lng: location.longitude },
         map: map,

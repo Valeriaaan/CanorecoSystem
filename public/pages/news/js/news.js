@@ -2,6 +2,7 @@
 
 import { firestore } from '../../../resources/js/config.js';
 import { collection, getDocs, doc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { formatDate, formatTime } from '../../../resources/js/main.js'; 
 
 let currentPage = 1;
 let totalPages = 1;
@@ -13,7 +14,7 @@ setupCategoryFilters();
 setupPaginationControls();
 setupSearchBar();
 
-// -------------------------------------------------- Fetch News with Pagination
+// -------------------------------------------------- Fetch News
 
 async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
     const newsContainer = document.getElementById("newsContainer");
@@ -80,12 +81,7 @@ function renderNewsCard(news, container) {
     const docId = news.id;
 
     // Format timestamp
-    const date = news.timestamp.toDate();
-    const formattedDate = date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        day: 'numeric',
-        month: 'long'
-    });
+    const date = formatDate(news.timestamp);
 
     // Trim content to 150 characters
     const trimmedContent = news.content.length > 150 ? news.content.substring(0, 150) + '...' : news.content;
@@ -109,7 +105,7 @@ function renderNewsCard(news, container) {
             <p class="card-text">${trimmedContent}</p>
         </div>
         <div class="card-footer bg-transparent border-0 text-end">
-            <small class="text-muted">Posted on <span class="fw-medium">${formattedDate}</span></small>
+            <small class="text-muted">Posted on <span class="fw-medium">${date}</span></small>
         </div>
     `;
 

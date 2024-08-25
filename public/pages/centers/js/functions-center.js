@@ -35,7 +35,6 @@ function geocodeLatLng(latlng) {
     });
 }
 
-
 // -------------------------------------------------- Fetch Barangay Function
 
 function fetchBarangayData(municipality, latlng) {
