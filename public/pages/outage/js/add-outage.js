@@ -1,3 +1,8 @@
+// -------------------------------------------------- Firebase Imports
+
+import { firestore } from '../../../resources/js/config.js';  
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
 let map;
 let selectedLocations = new Set(); // To keep track of selected locations
 
@@ -19,6 +24,92 @@ async function init() {
     }
 }
 
+// -------------------------------------------------- Add Outage
+
+document.getElementById('addOutageForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const form = event.target;
+
+    // Get form field values
+    const title = document.getElementById('title').value;
+    const date = document.getElementById('date').value;
+    const startTime = document.getElementById('start-time').value;
+    const endTime = document.getElementById('end-time').value;
+    const gawain = document.getElementById('gawain').value;
+    const description = document.getElementById('description').value;
+    const municipality = document.getElementById('municipality').value;
+    const selectedLocationsArray = Array.from(document.getElementById('selectedLocations').children).map(li => li.textContent.trim());
+
+    // Validate the form
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+
+    // Validation: Date cannot be before the current date
+    const currentDate = new Date().toISOString().split("T")[0];
+    if (date < currentDate) {
+        Swal.fire('Error', 'The selected date cannot be before the current date.', 'error');
+        return;
+    }
+
+    // Validation: End time cannot be before start time
+    if (endTime <= startTime) {
+        Swal.fire('Error', 'End time cannot be before or equal to the start time.', 'error');
+        return;
+    }
+
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to save this outage?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Save',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: "#4e73df",
+        cancelButtonColor: "#6c757d",
+        reverseButtons: true
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                if (!firestore) {
+                    throw new Error('Firestore instance is not initialized correctly.');
+                }
+
+                const outageCollectionRef = collection(firestore, 'outages');
+
+                if (!outageCollectionRef) {
+                    throw new Error('Failed to create a collection reference.');
+                }
+
+                await addDoc(outageCollectionRef, {
+                    title: title,
+                    date: date,
+                    startTime: startTime,
+                    endTime: endTime,
+                    gawain: gawain,
+                    description: description,
+                    municipality: municipality,
+                    selectedLocations: selectedLocationsArray,
+                    timestamp: Math.floor(new Date().getTime() / 1000.0)
+                });
+
+                Swal.fire('Saved!', 'The outage has been saved successfully.', 'success').then(() => {
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    window.location.href = 'outages.html';
+                });
+
+            } catch (error) {
+                console.error('Error saving document:', error.message || error);
+                Swal.fire('Error', `An error occurred while saving the outage: ${error.message}`, 'error');
+            }
+        }
+    });
+});
+
 // -------------------------------------------------- Fetch Barangays JSON data
 
 async function fetchBarangaysData() {
@@ -27,8 +118,10 @@ async function fetchBarangaysData() {
     return data.features.map(feature => ({
         municipalityId: feature.properties.ID_2,
         municipalityName: feature.properties.NAME_2,
+
         barangayId: feature.properties.ID_3,
         barangayName: feature.properties.NAME_3,
+        
         fullName: `${feature.properties.NAME_2}, ${feature.properties.NAME_3}`, // Concatenating for search
         coordinates: feature.geometry.coordinates // Save coordinates for highlighting
     }));
