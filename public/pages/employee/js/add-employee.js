@@ -1,9 +1,10 @@
 // -------------------------------------------------- Firebase Imports
 
-import { auth, firestore, storage } from '../../../resources/js/config.js';  
+import { auth, firestore, storage, messaging } from '../../../resources/js/config.js';  
+import { getToken, getMessaging } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging.js";
 import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-import { getDownloadURL, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { getDownloadURL, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 // -------------------------------------------------- Add Employee
 
@@ -27,14 +28,13 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async func
     const profilePicture = document.getElementById('profilePicture').files[0];
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const roles = 'employee'; // You can adjust this according to your roles structure
+    const roles = 'employee';
+    const area = document.getElementById('area').value;
 
     try {
-        // 1. Create a new user account with Firebase Authentication
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const userId = userCredential.user.uid;
 
-        // 2. Upload the profile picture to Firebase Storage (if a file is selected)
         let profilePictureUrl = '';
         if (profilePicture) {
             const storageReference = storageRef(storage, `profile_pictures/${userId}`);
@@ -42,31 +42,45 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async func
             profilePictureUrl = await getDownloadURL(storageReference);
         }
 
-        // 3. Save user data in Firestore under the "users" collection
+        const messaging = getMessaging();
+        const fcmToken = await getToken(messaging, { vapidKey: 'BLCM2rGsEjKb8yV9fRE0wyS07Krynd03w5LwExidcy34Kan8EieNXkYOkcGB-mRWEOoSsCNpcXpoF-OYMBLsw7c' });
+
         await addDoc(collection(firestore, 'users'), {
-            userId: userId,
+            uid: userId,
+            email: email,
+            fcmToken: fcmToken, 
             firstName: firstName,
             lastName: lastName,
             address: address,
-            contactNumber: contactNumber,
             birthdate: birthdate,
+            contactNumber: contactNumber,
             profilePicture: profilePictureUrl,
-            email: email,
             roles: roles,
+            area: area,
             status: 'Deactivated',
             timestamp: Math.floor(new Date().getTime()/1000.0)
         });
 
-        // Show success message or redirect to another page
-        alert('Employee added successfully!');
-        form.reset();
-        form.classList.remove('was-validated');
-        document.getElementById('profilePicturePreview').style.display = 'none';
+        Swal.fire({
+            title: 'Employee Added',
+            text: 'The employee has been successfully added!',
+            icon: 'success',
+
+        }).then(() => {
+            form.reset();
+            form.classList.remove('was-validated');
+            document.getElementById('profilePicturePreview').style.display = 'none';
+            window.location.href = 'employee.html'; // Redirect to employee.html
+        });
         
+
     } catch (error) {
-        // Handle errors here
         console.error('Error adding employee:', error);
-        alert('Failed to add employee. Please try again.');
+        Swal.fire({
+            title: 'Error',
+            text: `Failed to add employee: ${error.message}`,
+            icon: 'error',
+        });
     }
 });
 

@@ -5,6 +5,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-aut
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { getMessaging } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging.js";
 
 // -------------------------------------------------- Firebase Configuration
 
@@ -25,5 +26,6 @@ const auth = getAuth();
 const storage = getStorage(app);
 const database = getDatabase(app)
 const firestore = getFirestore(app);
+const messaging = getMessaging(app);
 
-export { app, database, storage, firestore, auth };
+export { app, database, storage, firestore, auth, messaging };
