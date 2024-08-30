@@ -72,6 +72,14 @@ body {
 
 .card {
     border: none;
+    box-shadow: 0 2px 4px rgba(195, 195, 195, 0.1);
+}
+
+.card-header {
+    background: white;
+}
+.center-card {
+    border: none;
     border-radius: 1rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

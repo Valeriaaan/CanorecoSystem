@@ -1,7 +1,7 @@
-import { auth, firestore, storage } from './config.js';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-import { getDownloadURL, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
-import { collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+// -------------------------------------------------- Firebase Imports
+
+import { auth } from './config.js';
+import { signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
 // -------------------------------------------------- Auth State Change 
 
@@ -25,7 +25,6 @@ async function loginUser(event) {
 
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
             Swal.fire({
                 icon: 'success',
                 title: 'Login Successful',
@@ -79,88 +78,6 @@ async function forgotPassword() {
 
 document.getElementById('forgotPassword').addEventListener('click', forgotPassword);
 
-// -------------------------------------------------- Registration
-
-async function registerUser(event) {
-    event.preventDefault();
-
-    const emailElement = document.getElementById('email');
-    const fullNameElement = document.getElementById('fullname');
-    const passwordElement = document.getElementById('password');
-    const confirmPasswordElement = document.getElementById('confirmPassword');
-    const mobileNumberElement = document.getElementById('mobile');
-    const profilePictureElement = document.getElementById('profilePicture');
-
-    if (emailElement && fullNameElement && passwordElement && confirmPasswordElement && mobileNumberElement && profilePictureElement) {
-        const email = emailElement.value;
-        const fullName = fullNameElement.value;
-        const password = passwordElement.value;
-        const confirmPassword = confirmPasswordElement.value;
-        const mobileNumber = mobileNumberElement.value;
-        const profilePicture = profilePictureElement.files[0];
-
-        if (password !== confirmPassword) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Registration Failed',
-                text: 'Passwords do not match.',
-            });
-            return;
-        }
-
-        if (!profilePicture) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Registration Failed',
-                text: 'Please upload a profile picture.',
-            });
-            return;
-        }
-
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            const storageReference = storageRef(storage, 'profilePictures/' + user.uid);
-
-            await uploadBytes(storageReference, profilePicture);
-            const downloadURL = await getDownloadURL(storageReference);
-
-            const usersCollection = collection(firestore, 'users');
-            const userDoc = doc(usersCollection, user.uid);
-
-            await setDoc(userDoc, {
-                fullName: fullName,
-                email: email,
-                mobileNumber: mobileNumber,
-                profilePicture: downloadURL
-            });
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Registration Successful',
-                text: 'Welcome!',
-            }).then(() => {
-                window.location.href = 'pages/dashboard/dashboard.html';
-            });
-            
-        } catch (error) {
-            if (error.code === 'auth/email-already-in-use') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Registration Failed',
-                    text: 'Email is already registered.',
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Registration Failed',
-                    text: error.message,
-                });
-            }
-        }
-    }
-}
-
 // -------------------------------------------------- Form Validation
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -173,16 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.preventDefault();
                 event.stopPropagation();
                 form.classList.add('was-validated');
-            } else {
-                if (form.id === 'loginForm') {
-                    loginUser(event);
-                } else if (form.id === 'registerForm') {
-                    registerUser(event);
-                }
+            } else if (form.id === 'loginForm') {
+                loginUser(event);
             }
         }, false);
     });
-
 });
 
 // -------------------------------------------------- Include Header & Footer
@@ -204,8 +116,6 @@ async function includeHTML() {
         } else {
             console.error('Failed to fetch footer.html:', footerResponse.statusText);
         }
-
-        
     } catch (error) {
         console.error('Error fetching HTML files:', error);
     }

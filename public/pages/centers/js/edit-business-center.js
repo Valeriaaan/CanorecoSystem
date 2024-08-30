@@ -45,6 +45,10 @@ async function initMap() {
     if (businessCenterId) {
         await loadBusinessCenterData(businessCenterId);
     }
+
+    document.getElementById('loadingSpinner').classList.add('d-none');
+    document.getElementById('editBusinessCenterForm').classList.remove('d-none')
+    document.getElementById('map').classList.remove('d-none')
 }
 
 // -------------------------------------------------- Load Existing Business Center Data

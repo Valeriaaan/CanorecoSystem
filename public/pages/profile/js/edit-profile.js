@@ -34,6 +34,11 @@ async function loadUserProfile(user) {
             document.getElementById('editLastName').value = data.lastName || '';
             document.getElementById('editEmail').value = data.email || '';
             document.getElementById('editMobileNumber').value = data.mobileNumber || '';
+
+            
+            // Hide the loading spinner and show the news container
+            document.getElementById('loadingSpinner').classList.add('d-none');
+            document.getElementById('profileContent').classList.remove('d-none');
         } else {
             Swal.fire('Error', 'User profile not found.', 'error');
         }

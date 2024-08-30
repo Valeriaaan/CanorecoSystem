@@ -40,7 +40,7 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
                     throw new Error('Firestore instance is not initialized correctly.');
                 }
 
-                const newsCollectionRef = collection(firestore, 'news1');
+                const newsCollectionRef = collection(firestore, 'news');
 
                 if (!newsCollectionRef) {
                     throw new Error('Failed to create a collection reference.');

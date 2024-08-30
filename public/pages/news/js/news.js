@@ -71,6 +71,7 @@ async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
 
         updatePaginationControls(newsArray.length, page);
 
+
     } catch (error) {
         console.error("Error fetching news: ", error);
         Swal.fire('Error!', 'There was an error fetching the news.', 'error');
@@ -79,21 +80,22 @@ async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
 
 function renderNewsCard(news, container) {
     const docId = news.id;
-
-    // Format timestamp
     const date = formatDate(news.timestamp);
-
-    // Trim content to 150 characters
     const trimmedContent = news.content.length > 150 ? news.content.substring(0, 150) + '...' : news.content;
 
     const newsCard = document.createElement("div");
     newsCard.classList.add("news-card", "border-bottom", "mb-1", "p-2");
+    newsCard.style.cursor = "pointer"; 
 
     newsCard.innerHTML = `
         <div class="card-body position-relative">
-            <span class="badge bg-primary position-absolute top-0 start-0 m-3">${news.category}</span>
+            <a href="view-news.html?id=${docId}" class="text-decoration-none text-dark d-block">
+                <span class="badge bg-primary position-absolute top-0 start-0 m-3">${news.category}</span>
+                <h5 class="card-title mt-4 pt-2">${news.title}</h5>
+                <p class="card-text">${trimmedContent}</p>
+            </a>
             <div class="dropdown position-absolute top-0 end-0 m-3">
-                <button class="btn btn-link text-secondary p-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-link text-secondary p-2" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
@@ -101,16 +103,31 @@ function renderNewsCard(news, container) {
                     <li><a class="dropdown-item delete-item" href="#">Delete</a></li>
                 </ul>
             </div>
-            <h5 class="card-title mt-4 pt-2">${news.title}</h5>
-            <p class="card-text">${trimmedContent}</p>
         </div>
         <div class="card-footer bg-transparent border-0 text-end">
             <small class="text-muted">Posted on <span class="fw-medium">${date}</span></small>
         </div>
     `;
 
+    newsCard.querySelector('.edit-item').addEventListener('click', function (event) {
+        event.preventDefault();
+        window.location.href = `edit-news.html?id=${docId}`;
+    });
+    
+    // Add click event listener to the card, but exclude the dropdown from triggering the navigation
+    newsCard.addEventListener("click", function (event) {
+        const target = event.target;
+        // Check if the clicked element is inside the dropdown
+        if (!target.closest('.dropdown')) {
+            window.location.href = `view-news.html?id=${docId}`;
+        }
+    });
+
     container.appendChild(newsCard);
     deleteNews(newsCard, docId);
+
+    // Hide the loading spinner and show the news container
+    document.getElementById('loadingSpinner').classList.add('d-none');
 }
 
 // -------------------------------------------------- Pagination Controls

@@ -44,6 +44,10 @@ async function initMap() {
     if (bayadCenterId) {
         await loadBayadCenterData(bayadCenterId);
     }
+
+    document.getElementById('loadingSpinner').classList.add('d-none');
+    document.getElementById('editBayadCenterForm').classList.remove('d-none')
+    document.getElementById('map').classList.remove('d-none')
 }
 
 // -------------------------------------------------- Load Existing Bayad Center Data

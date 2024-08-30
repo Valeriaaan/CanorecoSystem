@@ -26,6 +26,9 @@ window.initMap = async () => {
     document.getElementById('municipalityFilter').addEventListener('change', filterLocations);
 
     updateLocationCount(locations.length);
+    
+    document.getElementById('loadingSpinner').classList.add('d-none');
+    document.getElementById('map').classList.remove('d-none');
 };
 
 function addMarker(location, id) {
@@ -123,7 +126,7 @@ function addLocationToCard(location, id) {
     const locationsContainer = document.getElementById('locationsContainer');
     const col = document.createElement('div');
 
-    col.className = 'card shadow-sm mb-3';
+    col.className = 'center-card card shadow-sm mb-3';
     col.setAttribute('data-lat', location.latitude);
     col.setAttribute('data-lng', location.longitude);
     col.setAttribute('data-id', id);

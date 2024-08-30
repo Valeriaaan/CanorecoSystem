@@ -38,9 +38,9 @@
                         <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
                             <ul class="navbar-nav">
                                 <li class="nav-item dropdown me-1">
-                                    <a class="nav-link" href="#" id="navbarNotifications" role="button"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="nav-link" href="#" id="navbarNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-bell"></i>
+                                        <span class="d-inline d-lg-none ms-1 fw-medium">Notifications</span>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarNotifications">
                                         <li><a class="dropdown-item" href="#">Notification 1</a></li>
@@ -50,9 +50,9 @@
                                 </li>
                                 
                                 <li class="nav-item dropdown me-1">
-                                    <a class="nav-link" href="#" id="navbarMessages" role="button"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="nav-link" href="#" id="navbarMessages" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-envelope"></i>
+                                        <span class="d-inline d-lg-none ms-1 fw-medium">Messages</span>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarMessages">
                                         <li><a class="dropdown-item" href="#">Message 1</a></li>
@@ -64,13 +64,12 @@
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="navbarProfile" role="button"
                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img src="https://github.com/mdo.png" id="userProfilePicture" alt="Profile" width="30" height="30"
-                                            class="rounded-circle">
-                                            <span id="userFullName" class="ms-1 fw-medium"></span>
+                                        <img src="https://github.com/mdo.png" id="userProfilePicture" alt="Profile" width="30" height="30" class="rounded-circle">
+                                        <span id="userFullName" class="ms-1 fw-medium"></span>
                                     </a>
 
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarProfile">
-                                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                                        <li><a class="dropdown-item" href="../profile/profile.html">Profile</a></li>
                                         <li><a class="dropdown-item" href="#">Settings</a></li>
                                         <li><a class="dropdown-item" href="#" id="logout">Sign out</a></li>
                                     </ul>
@@ -113,7 +112,52 @@
                         <div class="col-lg-8 col-md-6 mx-auto">
                             <div class="card px-2">
                                 <div class="card-body">
-                                   
+                                    
+                                    <!-- Loading Spinner -->
+                                    <div id="loadingSpinner" class="d-flex justify-content-center align-items-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <form id="editNewsForm" class="d-none" novalidate>
+                                        <div class="mb-3">
+                                            <label for="newsTitle" class="form-label">Title</label>
+                                            <input type="text" class="form-control" id="newsTitle" required>
+                                            <div class="invalid-feedback">
+                                                Please provide a title.
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="newsContent" class="form-label">Content</label>
+                                            <textarea class="form-control" id="newsContent" rows="5" required></textarea>
+                                            <div class="invalid-feedback">
+                                                Please provide content.
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="newsCategory" class="form-label">Category</label>
+                                            <select class="form-select" id="newsCategory" required>
+                                                <option value="" selected disabled>Select category</option>
+                                                <option value="Billing Rates">Billing Rates</option>
+                                                <option value="CANORECO Advisories">CANORECO Advisories</option>
+                                                <option value="CANORECO Balita">CANORECO Balita</option>
+                                                <option value="COOP Activities">COOP Activities</option>
+                                                <option value="Emergency Power Service Interruptions">Emergency Power Service Interruptions</option>
+                                                <option value="Invitation to Bid">Invitation to Bid</option>
+                                                <option value="Maintenance Activities">Maintenance Activities</option>
+                                                <option value="Notice of Vacancy">Notice of Vacancy</option>
+                                                <option value="Patalastas ng Power Interruption">Patalastas ng Power Interruption</option>
+                                                <option value="Schedules">Schedules</option>
+                                                <option value="Uncategorized">Uncategorized</option>
+                                                <option value="Consumer Complaints">Consumer Complaints</option>
+                                            </select>
+                                            <div class="invalid-feedback">
+                                                Please provide a category.
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Update News</button>
+                                    </form>
                                     
                                 </div>
                             </div>
@@ -138,6 +182,8 @@
 
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
+    <script src="../news/js/edit-news.js" type="module"></script>
+
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>

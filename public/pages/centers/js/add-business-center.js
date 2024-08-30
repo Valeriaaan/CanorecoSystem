@@ -36,6 +36,10 @@ function initMap() {
 
         geocodeLatLng(clickedLocation);
     });
+    
+    document.getElementById('loadingSpinner').classList.add('d-none');
+    document.getElementById('addBusinessCenterForm').classList.remove('d-none');
+    document.getElementById('map').classList.remove('d-none');
 }
 
 // -------------------------------------------------- Format Mobile Number Inputs

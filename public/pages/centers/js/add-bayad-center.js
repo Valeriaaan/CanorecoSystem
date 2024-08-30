@@ -35,6 +35,10 @@ function initMap() {
 
         geocodeLatLng(clickedLocation);
     });
+
+    document.getElementById('loadingSpinner').classList.add('d-none');
+    document.getElementById('addBayadCenterForm').classList.remove('d-none');
+    document.getElementById('map').classList.remove('d-none');
 }
 
 // -------------------------------------------------- Form Submission Handling

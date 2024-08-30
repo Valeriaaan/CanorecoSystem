@@ -2,7 +2,7 @@
 
 import { auth, firestore, storage, messaging } from '../../../resources/js/config.js';  
 import { getToken, getMessaging } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging.js";
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, doc, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import { getDownloadURL, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
@@ -45,10 +45,13 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async func
         const messaging = getMessaging();
         const fcmToken = await getToken(messaging, { vapidKey: 'BLCM2rGsEjKb8yV9fRE0wyS07Krynd03w5LwExidcy34Kan8EieNXkYOkcGB-mRWEOoSsCNpcXpoF-OYMBLsw7c' });
 
-        await addDoc(collection(firestore, 'users'), {
+        const usersCollection = collection(firestore, 'users');
+        const userDoc = doc(usersCollection, userId);
+
+        await setDoc(userDoc, {
             uid: userId,
             email: email,
-            fcmToken: fcmToken, 
+            token: fcmToken, 
             firstName: firstName,
             lastName: lastName,
             address: address,
@@ -57,8 +60,9 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async func
             profilePicture: profilePictureUrl,
             roles: roles,
             area: area,
-            status: 'Deactivated',
-            timestamp: Math.floor(new Date().getTime()/1000.0)
+            access: 'Deactivated',
+            timestamp: Math.floor(new Date().getTime()/1000.0),
+            password: password
         });
 
         Swal.fire({
