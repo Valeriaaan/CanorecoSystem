@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore } from '../../../resources/js/config.js';  
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 let map;
 let selectedLocations = new Set(); // To keep track of selected locations
@@ -38,8 +38,12 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
     const endTime = document.getElementById('end-time').value;
     const gawain = document.getElementById('gawain').value;
     const description = document.getElementById('description').value;
-    const municipality = document.getElementById('municipality').value;
-    const selectedLocationsArray = Array.from(document.getElementById('selectedLocations').children).map(li => li.textContent.trim());
+
+    // Collect the selected location IDs
+    const selectedLocationsArray = Array.from(document.getElementById('selectedLocations').children).map(li => ({
+        barangayId: li.getAttribute('data-id'),
+        municipalityId: li.getAttribute('data-municipality-id')
+    }));
 
     // Validate the form
     if (!form.checkValidity()) {
@@ -71,6 +75,7 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
         confirmButtonColor: "#4e73df",
         cancelButtonColor: "#6c757d",
         reverseButtons: true
+
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
@@ -79,27 +84,38 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                 }
 
                 const outageCollectionRef = collection(firestore, 'outages');
+                const newsCollectionRef = collection(firestore, 'news');
 
-                if (!outageCollectionRef) {
-                    throw new Error('Failed to create a collection reference.');
-                }
+                const timestamp = Math.floor(new Date().getTime() / 1000.0).toString();
 
-                await addDoc(outageCollectionRef, {
+                await setDoc(doc(outageCollectionRef, timestamp), {
                     title: title,
                     date: date,
                     startTime: startTime,
                     endTime: endTime,
                     gawain: gawain,
-                    description: description,
-                    municipality: municipality,
+                    content: description,
+                    category: "Patalastas ng Power Interruption",
                     selectedLocations: selectedLocationsArray,
-                    timestamp: Math.floor(new Date().getTime() / 1000.0)
+                    timestamp: parseInt(timestamp) 
+                });
+
+                await setDoc(doc(newsCollectionRef, timestamp), {
+                    title: title,
+                    date: date,
+                    startTime: startTime,
+                    endTime: endTime,
+                    gawain: gawain,
+                    content: description,
+                    category: "Patalastas ng Power Interruption",
+                    selectedLocations: selectedLocationsArray,
+                    timestamp: parseInt(timestamp)
                 });
 
                 Swal.fire('Saved!', 'The outage has been saved successfully.', 'success').then(() => {
                     form.reset();
                     form.classList.remove('was-validated');
-                    window.location.href = 'outages.html';
+                    window.location.href = 'outage.html';
                 });
 
             } catch (error) {
@@ -109,6 +125,7 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
         }
     });
 });
+
 
 // -------------------------------------------------- Fetch Barangays JSON data
 
@@ -213,7 +230,6 @@ function autocomplete(input, data) {
         closeAllLists(e.target);
     });
 }
-
 
 // -------------------------------------------------- Toggle location selection
 

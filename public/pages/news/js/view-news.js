@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore } from '../../../resources/js/config.js';
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { formatDate } from '../../../resources/js/main.js';
 
 // Get the 'id' parameter from the URL
@@ -41,7 +41,7 @@ async function fetchNewsData(id) {
     }
 }
 
-// -------------------------------------------------- Populate Content
+// -------------------------------------------------- Populate Content & handle Delete and Edit functions
 
 function populateNewsContent(title, content, date, category) {
     // Get the news container element
@@ -49,8 +49,18 @@ function populateNewsContent(title, content, date, category) {
 
     // Define the HTML structure for the news content
     const newsHTML = `
-        <div class="mb-2">
-            <span id="news-category" class="badge bg-primary">${category}</span>
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="mb-2">
+                <span id="news-category" class="badge bg-primary">${category}</span>
+            </div>
+            <div>
+                <button class="edit-item btn btn-sm btn-outline-primary me-1 px-2">
+                    <i class="fas fa-edit d-inline d-sm-none"></i><span class="d-none d-sm-inline">Edit</span>
+                </button>
+                <button class="delete-item btn btn-sm btn-outline-danger px-2">
+                    <i class="fas fa-trash-alt d-inline d-sm-none"></i><span class="d-none d-sm-inline">Delete</span>
+                </button>
+            </div>
         </div>
 
         <h4 id="news-title" class="card-title">${title}</h4>
@@ -62,4 +72,35 @@ function populateNewsContent(title, content, date, category) {
 
     // Set the innerHTML of the newsContainer
     newsContainer.innerHTML = newsHTML;
+
+    // Add event listeners for the edit and delete buttons
+    document.querySelector('.edit-item').addEventListener('click', () => {
+        // Redirect to edit-news.html with the news ID in the query string
+        window.location.href = `edit-news.html?id=${newsId}`;
+    });
+
+    document.querySelector('.delete-item').addEventListener('click', async () => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Delete'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await deleteDoc(doc(firestore, 'news', newsId));
+                Swal.fire('Deleted!', 'The news item has been deleted.', 'success');
+
+                window.location.href = 'news.html';
+
+            } catch (error) {
+                console.error("Error deleting news:", error);
+                Swal.fire('Error!', 'There was an error deleting the news item.', 'error');
+            }
+        }
+    });
 }

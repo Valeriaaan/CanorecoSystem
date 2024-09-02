@@ -4,7 +4,7 @@ import { firestore } from '../../../resources/js/config.js';
 import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const locationsCollection = collection(firestore, 'business_centers');
-
+ 
 // -------------------------------------------------- Map and Marker Setup
 
 let map;
@@ -99,7 +99,6 @@ function updateLocationsDisplay(filteredLocations) {
     updateLocationCount(filteredLocations.length);
 }
 
-
 function filterLocations() {
     const searchInput = document.getElementById('searchInput').value.toLowerCase();
     const municipalityFilter = document.getElementById('municipalityFilter').value;
@@ -161,7 +160,7 @@ function addLocationToCard(location, id) {
     });
 }
 
-// -------------------------------------------------- Delete Location 
+// -------------------------------------------------- Delete Location
 
 window.confirmDeleteLocation = async (id, name) => {
     const result = await Swal.fire({

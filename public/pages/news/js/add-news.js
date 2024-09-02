@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore } from '../../../resources/js/config.js';  
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, addDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 // -------------------------------------------------- Add News
 
@@ -10,18 +10,15 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
 
     const form = event.target;
 
-    // Get form field values
     const newsTitle = document.getElementById('newsTitle').value;
     const newsCategory = document.getElementById('newsCategory').value;
     const newsContent = document.getElementById('newsContent').value;
 
-    // Validate the form
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
         return;
     }
 
-    // Show confirmation dialog
     Swal.fire({
         title: 'Are you sure?',
         text: "Do you want to save this news?",
@@ -41,16 +38,18 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
                 }
 
                 const newsCollectionRef = collection(firestore, 'news');
+                const timestamp = Math.floor(new Date().getTime() / 1000.0).toString();
 
-                if (!newsCollectionRef) {
-                    throw new Error('Failed to create a collection reference.');
-                }
-
-                await addDoc(newsCollectionRef, {
+                await setDoc(doc(newsCollectionRef, timestamp), {
                     title: newsTitle,
+                    date: "",
+                    startTime: "",
+                    endTime: "",
+                    gawain: "",
                     content: newsContent,
                     category: newsCategory,
-                    timestamp:  Math.floor(new Date().getTime()/1000.0)
+                    selectedLocations: "",
+                    timestamp: parseInt(timestamp)
                 });
 
                 Swal.fire('Saved!', 'The news has been saved successfully.', 'success').then(() => {
