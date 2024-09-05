@@ -8,6 +8,11 @@ let map;
 const outagesCollection = collection(firestore, 'outages');
 const selectedLocations = new Map(); // Change Set to Map to store location IDs and names
 
+// Get the current date and time
+const currentDate = new Date();
+const formattedDate = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+const currentTime = currentDate.getHours() * 100 + currentDate.getMinutes(); // Format: HHMM
+
 // -------------------------------------------------- Fetch Complaints Count
 
 async function fetchComplaintsCount() {
@@ -36,8 +41,6 @@ async function fetchOutageCount() {
         console.error("Error fetching outage count:", error);
     }
 }
-
-// -------------------------------------------------- Fetch and Display News
 
 // -------------------------------------------------- Fetch and Display News
 
@@ -72,7 +75,6 @@ async function fetchNews() {
                 </div>
             `;
 
-            // Append the news item to the container
             newsContainer.innerHTML += newsItem;
             newsCount++;
         });
@@ -85,7 +87,6 @@ async function fetchNews() {
         console.error("Error fetching news:", error);
     }
 }
-
 
 // -------------------------------------------------- Fetch Barangays JSON data
 
@@ -136,29 +137,6 @@ async function initMap() {
         };
     });
 
-    // Add mouseover event to show tooltip
-    map.data.addListener('mouseover', (event) => {
-        const featureName = event.feature.getProperty('NAME_3') || event.feature.getProperty('NAME_2');
-        const tooltipContent = featureName || 'No name available';
-        const tooltip = document.createElement('div');
-        tooltip.className = 'map-tooltip';
-        tooltip.innerText = tooltipContent;
-        document.body.appendChild(tooltip);
-
-        const position = event.latLng;
-        tooltip.style.position = 'absolute';
-        tooltip.style.left = `${position.lng()}px`;
-        tooltip.style.top = `${position.lat()}px`;
-    });
-
-    // Add mouseout event to hide tooltip
-    map.data.addListener('mouseout', () => {
-        const tooltips = document.getElementsByClassName('map-tooltip');
-        while (tooltips.length > 0) {
-            tooltips[0].parentNode.removeChild(tooltips[0]);
-        }
-    });
-
     // Initial highlight of selected locations
     highlightSelectedLocations();
 }
@@ -190,7 +168,68 @@ function getLocationName(locationId, barangaysData) {
     return location ? location.fullName : null;
 }
 
+// -------------------------------------------------- Filter Outages by Date and Time
+
+async function fetchFilteredOutages(isCurrentOutages) {
+    console.log(`Fetching ${isCurrentOutages ? 'current' : 'future'} outages...`);
+    const outagesSnapshot = await getDocs(outagesCollection);
+    const barangaysData = await fetchBarangaysData();
+
+    selectedLocations.clear();
+
+    outagesSnapshot.forEach((doc) => {
+        const outage = doc.data();
+        const outageDate = outage.date; // Outage date in YYYY-MM-DD
+        const outageStartTime = parseInt(outage.startTime.replace(':', '')); // Convert HH:MM to HHMM
+        const outageEndTime = parseInt(outage.endTime.replace(':', '')); // Convert HH:MM to HHMM
+
+        console.log(`Processing outage on ${outageDate} from ${outageStartTime} to ${outageEndTime}`);
+        console.log(`Current Date: ${formattedDate}`);
+        console.log(`Current Time: ${currentTime}`);
+        
+
+        if (isCurrentOutages) {
+            // Check if outage is today and within the current time range
+            if (outageDate === formattedDate && currentTime >= outageStartTime && currentTime <= outageEndTime) {
+                console.log(`Current outage detected: ${outageDate}`);
+                outage.selectedLocations.forEach(location => {
+                    const locationName = getLocationName(location, barangaysData);
+                    if (locationName) {
+                        selectedLocations.set(location, locationName);
+                        console.log(`Adding location ID: ${location} (${locationName})`);
+                    }
+                });
+            }
+        } else {
+            // Check if outage is in the future
+            if (outageDate > formattedDate) {
+                console.log(`Future outage detected: ${outageDate}`);
+                outage.selectedLocations.forEach(location => {
+                    const locationName = getLocationName(location, barangaysData);
+                    if (locationName) {
+                        selectedLocations.set(location, locationName);
+                        console.log(`Adding location ID: ${location} (${locationName})`);
+                    }
+                });
+            }
+        }
+    });
+
+    highlightSelectedLocations();
+}
+
+// -------------------------------------------------- Tab Click Event Handlers
+
+document.querySelector('.nav-link[href="#currentOutages"]').addEventListener('click', async () => {
+    await fetchFilteredOutages(true); // Show current outages
+});
+
+document.querySelector('.nav-link[href="#futureOutages"]').addEventListener('click', async () => {
+    await fetchFilteredOutages(false); // Show future outages
+});
+
 // -------------------------------------------------- Initialize and Fetch Data
+
 
 async function initializeDashboard() {
     try {
@@ -212,6 +251,7 @@ async function initializeDashboard() {
         await fetchComplaintsCount();
         await fetchOutageCount();
         await fetchNews();  
+        await fetchFilteredOutages(true); // Load current outages by default
     
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('mainContainer').classList.remove('d-none');
