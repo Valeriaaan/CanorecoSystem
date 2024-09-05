@@ -109,12 +109,13 @@
                     </div>
 
                     <div class="row p-4 pt-0 flex-column flex-lg-row">
+                         
                         <!-- News Container -->
-                        <div class="col-lg-8 col-md-6 mx-auto">
-                            <div class="card px-2">
-                                <div class="card-body">
-                                   
-                                    <form id="addNewsForm" class="needs-validation mt-4" novalidate>
+                        <div class="card p-2">
+                            <div class="card-body">
+                                <div class="col-lg-8 col-md-8 mx-auto">
+
+                                    <form id="addNewsForm" class="needs-validation my-3" novalidate>
                                         
                                         <div class="mb-3">
                                             <label for="newsTitle" class="form-label">News Title</label>
@@ -154,18 +155,16 @@
                                             </div>
                                         </div>
 
+                                        <div class="mb-3">
+                                            <label for="newsImages" class="form-label">Upload Images</label>
+                                            <input type="file" class="form-control" id="newsImages" accept="image/*" multiple>
+                                            <div class="invalid-feedback">
+                                                Please upload at least one image.
+                                            </div>
+                                        </div>
+
                                         <button type="submit" class="btn btn-main">Add News</button>
                                     </form>
-
-                                </div>
-                            </div>
-                        </div>
-                         
-                        <!-- News Selection Container -->
-                        <div class="col-lg-4 col-md-6 mt-4 mt-lg-0">
-                            <div class="card px-2">
-                                <div class="card-body">
-                                   
                                 </div>
                             </div>
                         </div>

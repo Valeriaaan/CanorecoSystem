@@ -79,6 +79,16 @@ document.getElementById('addBayadCenterForm').addEventListener('submit', async f
 
     }).then(async (result) => {
         if (result.isConfirmed) {
+
+            Swal.fire({
+                title: 'Saving...',
+                text: 'Please wait while the bayad center is being saved.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 await addDoc(collection(firestore, 'bayad_centers'), {
                     locationName: locationName,

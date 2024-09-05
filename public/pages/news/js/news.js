@@ -111,9 +111,16 @@ function renderNewsCard(news, container) {
 
     newsCard.querySelector('.edit-item').addEventListener('click', function (event) {
         event.preventDefault();
-        window.location.href = `edit-news.html?id=${docId}`;
+        if (news.category === "Patalastas ng Power Interruption") {
+            // Redirect to edit-outage.html if the category is for power interruption
+            window.location.href = `edit-outage.html?id=${docId}`;
+        } else {
+            // Otherwise, redirect to edit-news.html
+            window.location.href = `edit-news.html?id=${docId}`;
+        }
     });
     
+
     // Add click event listener to the card, but exclude the dropdown from triggering the navigation
     newsCard.addEventListener("click", function (event) {
         const target = event.target;

@@ -160,7 +160,7 @@
                                     
                                     <div class="mb-3">
                                         <label for="municipality" class="form-label">Affected Areas</label>
-                                        <input type="text" class="form-control" id="municipality" placeholder="Start typing municipality or barangay" required>
+                                        <input type="text" class="form-control" id="municipality" placeholder="Start typing municipality or barangay">
                                         <div class="invalid-feedback">
                                             Please select affected Areas.
                                         </div>
@@ -174,7 +174,14 @@
                                     </div>
                                     
                                     <div id="municipality-presets"></div>
-
+                                    
+                                    <div class="mb-3">
+                                        <label for="images" class="form-label">Upload Images</label>
+                                        <input type="file" class="form-control" id="images" accept="image/*" multiple>
+                                        <div class="invalid-feedback">
+                                            Please upload at least one image.
+                                        </div>
+                                    </div>
                                 
                                     <button type="submit" class="btn btn-main mb-3">Save</button>
                                 </form>

@@ -93,32 +93,58 @@ document.getElementById('editProfileForm').addEventListener('submit', async func
             const mobileNumber = document.getElementById('editMobileNumber').value;
             const profilePicture = document.getElementById('editProfilePicture').files[0];
 
-            try {
-                const docRef = doc(firestore, 'users', user.uid);
+            // Confirmation prompt before updating
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to update your profile?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Update',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: "#4e73df",
+                cancelButtonColor: "#6c757d",
+                reverseButtons: true
+            });
 
-                await updateDoc(docRef, {
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    mobileNumber: mobileNumber,
-                    profilePicture: profilePicture ? await uploadProfilePicture(profilePicture) : document.getElementById('profilePicturePreview').src
+            if (result.isConfirmed) {
+                // Show loading animation
+                Swal.fire({
+                    title: 'Updating...',
+                    text: 'Please wait while your profile is being updated.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
                 });
 
-                // Update profile details in Firebase Auth
-                await updateProfile(user, {
-                    displayName: `${firstName} ${lastName}`,
-                    photoURL: document.getElementById('profilePicturePreview').src
-                });
+                try {
+                    const docRef = doc(firestore, 'users', user.uid);
 
-                Swal.fire('Updated!', 'Your profile has been updated.', 'success').then(() => {
-                    form.reset();
-                    form.classList.remove('was-validated');
-                    location.reload()
-                });
-                
-            } catch (error) {
-                console.error('Error updating profile:', error);
-                Swal.fire('Error', 'An error occurred while updating the profile.', 'error');
+                    await updateDoc(docRef, {
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        mobileNumber: mobileNumber,
+                        profilePicture: profilePicture ? await uploadProfilePicture(profilePicture) : document.getElementById('profilePicturePreview').src
+                    });
+
+                    // Update profile details in Firebase Auth
+                    await updateProfile(user, {
+                        displayName: `${firstName} ${lastName}`,
+                        photoURL: document.getElementById('profilePicturePreview').src
+                    });
+
+                    // Success message after update
+                    Swal.fire('Updated!', 'Your profile has been updated.', 'success').then(() => {
+                        form.reset();
+                        form.classList.remove('was-validated');
+                        location.reload();
+                    });
+
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    Swal.fire('Error', 'An error occurred while updating the profile.', 'error');
+                }
             }
         } else {
             Swal.fire('Error', 'No user is logged in.', 'error');
@@ -128,20 +154,19 @@ document.getElementById('editProfileForm').addEventListener('submit', async func
 
 // -------------------------------------------------- Change Password Form Submission
 
-document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+document.getElementById('changePasswordForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
 
     const form = event.target;
     const oldPassword = document.getElementById('oldPassword').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
-
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
         return;
     }
-    
+
     if (newPassword !== confirmPassword) {
         Swal.fire({
             icon: 'error',
@@ -156,33 +181,59 @@ document.getElementById('changePasswordForm').addEventListener('submit', async (
     if (user) {
         const credential = EmailAuthProvider.credential(user.email, oldPassword);
 
-        try {
-            await reauthenticateWithCredential(user, credential);
-            await updatePassword(user, newPassword);
+        // Confirmation prompt before changing password
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to change your password?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Update',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: "#4e73df",
+            cancelButtonColor: "#6c757d",
+            reverseButtons: true
+        });
 
+        if (result.isConfirmed) {
+            // Show loading animation
             Swal.fire({
-                icon: 'success',
-                title: 'Password Changed',
-                text: 'Your password has been updated successfully.',
+                title: 'Changing Password...',
+                text: 'Please wait while your password is being updated.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             });
 
-            form.reset();
-            form.classList.remove('was-validated');
-            location.reload();
+            try {
+                await reauthenticateWithCredential(user, credential);
+                await updatePassword(user, newPassword);
 
-        } catch (error) {
-            if (error.code === 'auth/wrong-password') {
+                // Success message
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Incorrect Old Password',
-                    text: 'The old password you entered is incorrect.',
+                    icon: 'success',
+                    title: 'Password Changed',
+                    text: 'Your password has been updated successfully.',
                 });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: `Failed to update password: ${error.message}`,
-                });
+
+                form.reset();
+                form.classList.remove('was-validated');
+                location.reload();
+
+            } catch (error) {
+                if (error.code === 'auth/wrong-password') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Incorrect Old Password',
+                        text: 'The old password you entered is incorrect.',
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: `Failed to update password: ${error.message}`,
+                    });
+                }
             }
         }
     } else {
@@ -193,4 +244,5 @@ document.getElementById('changePasswordForm').addEventListener('submit', async (
         });
     }
 });
+
 

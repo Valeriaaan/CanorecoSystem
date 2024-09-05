@@ -108,19 +108,14 @@
                     </div>
 
                     <div class="row p-4 pt-0 flex-column flex-lg-row">
+                        
                         <!-- News Container -->
-                        <div class="col-lg-8 col-md-6 mx-auto">
-                            <div class="card px-2">
-                                <div class="card-body">
+                        <div class="card p-2">
+                            <div class="card-body">
+                                <div class="col-lg-8 col-md-8 mx-auto">
                                     
-                                    <!-- Loading Spinner -->
-                                    <div id="loadingSpinner" class="d-flex justify-content-center align-items-center">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <form id="editNewsForm" class="d-none" novalidate>
+                                    <form id="editNewsForm" class="d-none needs-validation my-3" novalidate>
+
                                         <div class="mb-3">
                                             <label for="newsTitle" class="form-label">Title</label>
                                             <input type="text" class="form-control" id="newsTitle" required>
@@ -128,6 +123,7 @@
                                                 Please provide a title.
                                             </div>
                                         </div>
+
                                         <div class="mb-3">
                                             <label for="newsContent" class="form-label">Content</label>
                                             <textarea class="form-control" id="newsContent" rows="5" required></textarea>
@@ -135,6 +131,7 @@
                                                 Please provide content.
                                             </div>
                                         </div>
+
                                         <div class="mb-3">
                                             <label for="newsCategory" class="form-label">Category</label>
                                             <select class="form-select" id="newsCategory" required>
@@ -156,18 +153,15 @@
                                                 Please provide a category.
                                             </div>
                                         </div>
+                                        
                                         <button type="submit" class="btn btn-primary">Update News</button>
                                     </form>
-                                    
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- News Selection Container -->
-                        <div class="col-lg-4 col-md-6 mt-4 mt-lg-0">
-                            <div class="card px-2">
-                                <div class="card-body">
-                                   
+                                    <!-- Loading Spinner -->
+                                    <div id="loadingSpinner" class="d-flex justify-content-center align-items-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

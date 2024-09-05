@@ -105,6 +105,16 @@ document.getElementById('addBusinessCenterForm').addEventListener('submit', asyn
 
     }).then(async (result) => {
         if (result.isConfirmed) {
+
+            Swal.fire({
+                title: 'Saving...',
+                text: 'Please wait while the business center is being saved.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 await addDoc(collection(firestore, 'business_centers'), {
                     locationName: locationName,

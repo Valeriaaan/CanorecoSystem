@@ -48,6 +48,7 @@ document.getElementById('editNewsForm').addEventListener('submit', async functio
 
     const form = event.target;
 
+    // Check form validity
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
         return;
@@ -57,22 +58,51 @@ document.getElementById('editNewsForm').addEventListener('submit', async functio
     const content = document.getElementById('newsContent').value;
     const category = document.getElementById('newsCategory').value;
 
-    try {
-        const docRef = doc(firestore, 'news', newsId);
+    // Confirmation prompt
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to update this news?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: "#4e73df",
+        cancelButtonColor: "#6c757d",
+        reverseButtons: true
+    });
 
-        await updateDoc(docRef, {
-            title: title,
-            content: content,
-            category: category
+    if (result.isConfirmed) {
+        
+        Swal.fire({
+            title: 'Updating...',
+            text: 'Please wait while the news is being updated.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading(); // Show loading animation
+            }
         });
 
-        Swal.fire('Updated!', 'The news has been updated.', 'success').then(() => {
-            document.getElementById('editNewsForm').reset();
-            form.classList.remove('was-validated');
-            window.location.href = 'news.html';
-        });
-    } catch (error) {
-        console.error('Error updating document:', error);
-        Swal.fire('Error', 'An error occurred while updating the news.', 'error');
+        try {
+            const docRef = doc(firestore, 'news', newsId);
+
+            await updateDoc(docRef, {
+                title: title,
+                content: content,
+                category: category
+            });
+
+            Swal.fire('Updated!', 'The news has been updated.', 'success').then(() => {
+                document.getElementById('editNewsForm').reset();
+                form.classList.remove('was-validated');
+                window.location.href = 'news.html';
+            });
+
+        } catch (error) {
+            console.error('Error updating document:', error);
+
+            // Error message in case of failure
+            Swal.fire('Error', 'An error occurred while updating the news.', 'error');
+        }
     }
 });
+

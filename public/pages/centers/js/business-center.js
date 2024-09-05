@@ -176,6 +176,16 @@ window.confirmDeleteLocation = async (id, name) => {
     });
 
     if (result.isConfirmed) {
+
+        Swal.fire({
+            title: 'Deleting...',
+            text: 'Please wait while the business center is being deleted.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         deleteLocation(id);
     } else {
         console.log('Cancelled: No deletion performed');

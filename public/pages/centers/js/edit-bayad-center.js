@@ -101,38 +101,62 @@ document.getElementById('editBayadCenterForm').addEventListener('submit', async 
     const street = document.getElementById('street').value;
     const unit = document.getElementById('unit').value;
 
-    try {
-        const docRef = doc(firestore, 'bayad_centers', bayadCenterId);
-        
-       const latitude = typeof selectedLatLng.lat === 'function' ? selectedLatLng.lat() : selectedLatLng.lat;
-       const longitude = typeof selectedLatLng.lng === 'function' ? selectedLatLng.lng() : selectedLatLng.lng;
+    // Confirmation prompt before updating
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to update this Bayad Center?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: "#4e73df",
+        cancelButtonColor: "#6c757d",
+        reverseButtons: true
+    });
 
-        await updateDoc(docRef, {
-            locationName: locationName,
-            latitude: latitude,
-            longitude: longitude,
-            municipality: municipality,
-            barangay: barangay,
-            street: street,
-            unit: unit
-        });
-
-        Swal.fire('Updated!', 'The location has been updated.', 'success').then(() => {
-            // Reset the form and marker
-            document.getElementById('editBayadCenterForm').reset();
-            form.classList.remove('was-validated');
-            if (marker) {
-                marker.setMap(null);
-                marker = null;
+    if (result.isConfirmed) {
+        // Show loading animation
+        Swal.fire({
+            title: 'Updating...',
+            text: 'Please wait while the Bayad Center is being updated.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
             }
-            selectedLatLng = null;
-
-            window.location.href = 'bayad-center.html';
         });
 
+        try {
+            const docRef = doc(firestore, 'bayad_centers', bayadCenterId);
+            const latitude = typeof selectedLatLng.lat === 'function' ? selectedLatLng.lat() : selectedLatLng.lat;
+            const longitude = typeof selectedLatLng.lng === 'function' ? selectedLatLng.lng() : selectedLatLng.lng;
 
-    } catch (error) {
-        console.error('Error updating document:', error);
-        Swal.fire('Error', 'An error occurred while updating the Bayad center.', 'error');
+            await updateDoc(docRef, {
+                locationName: locationName,
+                latitude: latitude,
+                longitude: longitude,
+                municipality: municipality,
+                barangay: barangay,
+                street: street,
+                unit: unit
+            });
+
+            // Success message after update
+            Swal.fire('Updated!', 'The location has been updated.', 'success').then(() => {
+                // Reset the form and marker
+                document.getElementById('editBayadCenterForm').reset();
+                form.classList.remove('was-validated');
+                if (marker) {
+                    marker.setMap(null);
+                    marker = null;
+                }
+                selectedLatLng = null;
+
+                window.location.href = 'bayad-center.html';
+            });
+
+        } catch (error) {
+            console.error('Error updating document:', error);
+            Swal.fire('Error', 'An error occurred while updating the Bayad Center.', 'error');
+        }
     }
 });

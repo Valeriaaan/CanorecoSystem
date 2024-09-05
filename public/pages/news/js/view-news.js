@@ -26,10 +26,10 @@ async function fetchNewsData(id) {
         if (docSnap.exists()) {
             // Extract data from the document
             const newsData = docSnap.data();
-            const { title, content, timestamp, category } = newsData;
+            const { title, content, timestamp, category, image } = newsData;
 
             // Populate the newsContainer with news data
-            populateNewsContent(title, content, timestamp, category);
+            populateNewsContent(title, content, timestamp, category, image);
         } else {
             console.error("No such document!");
         }
@@ -43,9 +43,19 @@ async function fetchNewsData(id) {
 
 // -------------------------------------------------- Populate Content & handle Delete and Edit functions
 
-function populateNewsContent(title, content, date, category) {
+function populateNewsContent(title, content, date, category, image) {
     // Get the news container element
     const newsContainer = document.getElementById('newsContainer');
+
+    // Generate image HTML if imageUrls exist
+    let imagesHTML = '';
+    if (image.length > 0) {
+        imagesHTML = image.map(url => `
+            <div class="col-12">
+                <img src="${url}" class="img-fluid rounded mb-3" alt="News Image" style="width: 100%;">
+            </div>
+        `).join('');
+    }
 
     // Define the HTML structure for the news content
     const newsHTML = `
@@ -68,6 +78,8 @@ function populateNewsContent(title, content, date, category) {
         <span class="far fa-calendar text-muted mb-3"></span><small id="news-date" class="text-muted ms-2 mb-3">${formatDate(date)}</small>
 
         <p id="news-content" class="card-text">${content}</p>
+
+        ${imagesHTML}
     `;
 
     // Set the innerHTML of the newsContainer
@@ -75,8 +87,13 @@ function populateNewsContent(title, content, date, category) {
 
     // Add event listeners for the edit and delete buttons
     document.querySelector('.edit-item').addEventListener('click', () => {
-        // Redirect to edit-news.html with the news ID in the query string
-        window.location.href = `edit-news.html?id=${newsId}`;
+        if (category === "Patalastas ng Power Interruption") {
+            // Redirect to edit-outage.html if the category is for power interruption
+            window.location.href = `edit-outage.html?id=${newsId}`;
+        } else {
+            // Otherwise, redirect to edit-news.html
+            window.location.href = `edit-news.html?id=${newsId}`;
+        }
     });
 
     document.querySelector('.delete-item').addEventListener('click', async () => {
@@ -93,9 +110,16 @@ function populateNewsContent(title, content, date, category) {
         if (result.isConfirmed) {
             try {
                 await deleteDoc(doc(firestore, 'news', newsId));
-                Swal.fire('Deleted!', 'The news item has been deleted.', 'success');
 
-                window.location.href = 'news.html';
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'The news item has been deleted.',
+                    icon: 'success',
+                    confirmButtonText: 'Done',
+                    confirmButtonColor: '#4e73df',
+                }).then(() => {
+                    window.location.href = 'news.html';
+                });
 
             } catch (error) {
                 console.error("Error deleting news:", error);

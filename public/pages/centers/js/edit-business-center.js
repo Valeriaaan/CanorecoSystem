@@ -110,12 +110,15 @@ document.getElementById('editBusinessCenterForm').addEventListener('submit', asy
         form.classList.add('was-validated');
         return;
     }
+
     if (mobile.length !== 13) {
-        Swal.fire('error!', 'mobile', 'error');
+        Swal.fire('Error', 'Mobile number should be 13 digits long, including the country code.', 'error');
+        return;
     }
 
     if (additionalMobile && additionalMobile.length !== 13) {
-        Swal.fire('error!', 'admobile', 'error');
+        Swal.fire('Error', 'Additional mobile number should be 13 digits long, including the country code.', 'error');
+        return;
     }
 
     if (!selectedLatLng) {
@@ -129,40 +132,65 @@ document.getElementById('editBusinessCenterForm').addEventListener('submit', asy
     const street = document.getElementById('street').value;
     const unit = document.getElementById('unit').value;
 
-    try {
-        const docRef = doc(firestore, 'business_centers', businessCenterId);
+    // Confirmation prompt before updating
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to update this Business Center?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: "#4e73df",
+        cancelButtonColor: "#6c757d",
+        reverseButtons: true
+    });
 
-       const latitude = typeof selectedLatLng.lat === 'function' ? selectedLatLng.lat() : selectedLatLng.lat;
-       const longitude = typeof selectedLatLng.lng === 'function' ? selectedLatLng.lng() : selectedLatLng.lng;
-
-       await updateDoc(docRef, {
-           locationName: locationName,
-           latitude: latitude,
-           longitude: longitude,
-           municipality: municipality,
-           barangay: barangay,
-           street: street,
-           unit: unit,
-           mobile: mobile,
-           additionalMobile: additionalMobile
-       });
-
-        Swal.fire('Updated!', 'The location has been updated.', 'success').then(() => {
-            // Reset the form and marker
-            document.getElementById('editBusinessCenterForm').reset();
-            form.classList.remove('was-validated');
-            if (marker) {
-                marker.setMap(null);
-                marker = null;
+    if (result.isConfirmed) {
+        // Show loading animation
+        Swal.fire({
+            title: 'Updating...',
+            text: 'Please wait while the Business Center is being updated.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
             }
-            selectedLatLng = null;
-
-            window.location.href = 'business-center.html';
         });
 
+        try {
+            const docRef = doc(firestore, 'business_centers', businessCenterId);
+            const latitude = typeof selectedLatLng.lat === 'function' ? selectedLatLng.lat() : selectedLatLng.lat;
+            const longitude = typeof selectedLatLng.lng === 'function' ? selectedLatLng.lng() : selectedLatLng.lng;
 
-    } catch (error) {
-        console.error('Error updating document:', error);
-        Swal.fire('Error', 'An error occurred while updating the business center.', 'error');
+            await updateDoc(docRef, {
+                locationName: locationName,
+                latitude: latitude,
+                longitude: longitude,
+                municipality: municipality,
+                barangay: barangay,
+                street: street,
+                unit: unit,
+                mobile: mobile,
+                additionalMobile: additionalMobile
+            });
+
+            // Success message after update
+            Swal.fire('Updated!', 'The Business Center information has been updated.', 'success').then(() => {
+                // Reset the form and marker
+                document.getElementById('editBusinessCenterForm').reset();
+                form.classList.remove('was-validated');
+                if (marker) {
+                    marker.setMap(null);
+                    marker = null;
+                }
+                selectedLatLng = null;
+
+                window.location.href = 'business-center.html';
+            });
+
+        } catch (error) {
+            console.error('Error updating document:', error);
+            Swal.fire('Error', 'An error occurred while updating the Business Center.', 'error');
+        }
     }
 });
+

@@ -1,7 +1,8 @@
 // -------------------------------------------------- Firebase Imports
 
-import { firestore } from '../../../resources/js/config.js';  
+import { firestore, storage } from '../../../resources/js/config.js';  
 import { collection, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 let map;
 let selectedLocations = new Set(); // To keep track of selected locations
@@ -38,12 +39,12 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
     const endTime = document.getElementById('end-time').value;
     const gawain = document.getElementById('gawain').value;
     const description = document.getElementById('description').value;
+    const images = document.getElementById('images').files;
 
     // Collect the selected location IDs
-    const selectedLocationsArray = Array.from(document.getElementById('selectedLocations').children).map(li => ({
-        barangayId: li.getAttribute('data-id'),
-        municipalityId: li.getAttribute('data-municipality-id')
-    }));
+    const selectedLocationsArray = Array.from(document.getElementById('selectedLocations').children).map(li => 
+        li.getAttribute('data-id')
+    );
 
     // Validate the form
     if (!form.checkValidity()) {
@@ -78,6 +79,16 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
 
     }).then(async (result) => {
         if (result.isConfirmed) {
+            
+            Swal.fire({
+                title: 'Saving...',
+                text: 'Please wait while the outage is being saved.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 if (!firestore) {
                     throw new Error('Firestore instance is not initialized correctly.');
@@ -85,8 +96,15 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
 
                 const outageCollectionRef = collection(firestore, 'outages');
                 const newsCollectionRef = collection(firestore, 'news');
-
                 const timestamp = Math.floor(new Date().getTime() / 1000.0).toString();
+
+                const imageUrls = [];
+                for (const file of images) {
+                    const storageRef = ref(storage, `newsImages/${timestamp}_${file.name}`);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(snapshot.ref);
+                    imageUrls.push(downloadURL);
+                }
 
                 await setDoc(doc(outageCollectionRef, timestamp), {
                     title: title,
@@ -97,7 +115,8 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                     content: description,
                     category: "Patalastas ng Power Interruption",
                     selectedLocations: selectedLocationsArray,
-                    timestamp: parseInt(timestamp) 
+                    timestamp: timestamp,
+                    image: imageUrls
                 });
 
                 await setDoc(doc(newsCollectionRef, timestamp), {
@@ -109,9 +128,11 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                     content: description,
                     category: "Patalastas ng Power Interruption",
                     selectedLocations: selectedLocationsArray,
-                    timestamp: parseInt(timestamp)
+                    timestamp: timestamp,
+                    image: imageUrls
                 });
 
+                // Close the loading Swal and show success message
                 Swal.fire('Saved!', 'The outage has been saved successfully.', 'success').then(() => {
                     form.reset();
                     form.classList.remove('was-validated');
@@ -125,6 +146,7 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
         }
     });
 });
+
 
 
 // -------------------------------------------------- Fetch Barangays JSON data

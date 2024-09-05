@@ -1,7 +1,8 @@
 // -------------------------------------------------- Firebase Imports
 
-import { firestore } from '../../../resources/js/config.js';  
+import { firestore, storage } from '../../../resources/js/config.js';  
 import { collection, addDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 // -------------------------------------------------- Add News
 
@@ -13,6 +14,7 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
     const newsTitle = document.getElementById('newsTitle').value;
     const newsCategory = document.getElementById('newsCategory').value;
     const newsContent = document.getElementById('newsContent').value;
+    const newsImages = document.getElementById('newsImages').files;
 
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
@@ -32,6 +34,16 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
 
     }).then(async (result) => {
         if (result.isConfirmed) {
+
+            Swal.fire({
+                title: 'Saving...',
+                text: 'Please wait while the news is being saved.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 if (!firestore) {
                     throw new Error('Firestore instance is not initialized correctly.');
@@ -39,6 +51,14 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
 
                 const newsCollectionRef = collection(firestore, 'news');
                 const timestamp = Math.floor(new Date().getTime() / 1000.0).toString();
+
+                const imageUrls = [];
+                for (const file of newsImages) {
+                    const storageRef = ref(storage, `newsImages/${timestamp}_${file.name}`);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(snapshot.ref);
+                    imageUrls.push(downloadURL);
+                }
 
                 await setDoc(doc(newsCollectionRef, timestamp), {
                     title: newsTitle,
@@ -49,7 +69,8 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
                     content: newsContent,
                     category: newsCategory,
                     selectedLocations: "",
-                    timestamp: parseInt(timestamp)
+                    timestamp: timestamp,
+                    image: imageUrls
                 });
 
                 Swal.fire('Saved!', 'The news has been saved successfully.', 'success').then(() => {
