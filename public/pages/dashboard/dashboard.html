@@ -100,7 +100,14 @@
                         </nav>
                     </div>
 
-                    <div class="row p-4 pt-0 flex-column flex-lg-row">
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="d-flex justify-content-center align-items-center m-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div id="mainContainer" class="row p-4 pt-0 flex-column flex-lg-row d-none">
                         
                         <div class="col-xl-9 col-lg-9 col-12">
                             
@@ -112,12 +119,12 @@
                                             <div class="d-flex justify-content-between p-md-1">
                                                 <div class="d-flex flex-row">
                                                     <div>
-                                                        <h4>18,000</h4>
+                                                        <h4 id="outagesCount">0</h4>
                                                         <p class="mb-0">Scheduled Outages</p>
                                                     </div>
                                                 </div>
                                                 <div class="align-self-center">
-                                                    <i class="fa fa-bolt text-warning fa-2x me-3"></i>
+                                                    <i class="fa fa-bolt fa-2x me-3" style="color: #ff7b07;"></i>
                                                 </div>
                                             </div>
                                         </div>
@@ -130,8 +137,8 @@
                                             <div class="d-flex justify-content-between p-md-1">
                                                 <div class="d-flex flex-row">
                                                     <div>
-                                                        <h4>18,000</h4>
-                                                        <p class="mb-0">Unscheduled Interruptions</p>
+                                                        <h4 id="interruptionsCount">0</h4>
+                                                        <p class="mb-0">Sudden Outages</p>
                                                     </div>
                                                 </div>
                                                 <div class="align-self-center">
@@ -148,8 +155,8 @@
                                             <div class="d-flex justify-content-between p-md-1">
                                                 <div class="d-flex flex-row">
                                                     <div>
-                                                        <h4>18,000</h4>
-                                                        <p class="mb-0">Consumer Complaints</p>
+                                                        <h4 id="complaintsCount">0</h4>
+                                                        <p class="mb-0">MCOs Complaints</p>
                                                     </div>
                                                 </div>
                                                 <div class="align-self-center">
@@ -168,8 +175,12 @@
                                         <div class="card-header">
                                             Outage Map
                                         </div>
-                                        <div class="card-body">
-                                            <div class="rounded mb-5 mx-3" id="map"></div>
+                                        <div class="card-body text-end">
+                                            <div class="rounded m-1" id="map" style="height: 50vh"></div>
+                                            <a href="../outage/outage.html" class="fw-medium btn btn-sm text-primary mt-3">
+                                                View Details
+                                                <i class="ms-1 fa-solid fa-sm fa-arrow-right"></i>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -183,8 +194,14 @@
                                 <div class="card-header">
                                     News
                                 </div>
-                                <div class="card-body">
-                                    <p>Lorem</p>
+                                <div class="card-body text-end">
+                                    <!-- News Container -->
+                                    <div id="newsContainer" class="text-start"></div>
+                                    
+                                    <a href="../news/news.html" class="fw-medium btn btn-sm text-primary">
+                                        View All News
+                                        <i class="ms-1 fa-solid fa-sm fa-arrow-right"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>

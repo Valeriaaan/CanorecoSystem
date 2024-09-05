@@ -38,7 +38,7 @@ function geocodeLatLng(latlng) {
 // -------------------------------------------------- Fetch Barangay Function
 
 function fetchBarangayData(municipality, latlng) {
-    const barangayDataUrl = `../centers/ph-json/Barangays.json`;
+    const barangayDataUrl = `../../../resources/json/filtered_Barangays.json`;
 
     fetch(barangayDataUrl)
         .then(response => {

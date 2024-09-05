@@ -25,8 +25,6 @@ async function init() {
             });
         });
 
-        console.log("Selected Locations from Firestore:", Array.from(selectedLocations));
-
         await initMap();
 
         document.getElementById('loadingSpinner').classList.add('d-none');
@@ -42,7 +40,7 @@ async function init() {
 // -------------------------------------------------- Fetch Barangays JSON data
 
 async function fetchBarangaysData() {
-    const response = await fetch('json/filtered_Barangays.json');
+    const response = await fetch('../../../resources/json/filtered_Barangays.json');
     const data = await response.json();
     return data.features.map(feature => ({
         municipalityId: feature.properties.ID_2,
@@ -101,7 +99,7 @@ async function initMap() {
     });
 
     // Load the GeoJSON data for the barangays
-    map.data.loadGeoJson('json/filtered_Barangays.json', null, (features) => {
+    map.data.loadGeoJson('../../../resources/json/filtered_Barangays.json', null, (features) => {
         if (features.length === 0) {
             console.error("No features were loaded. Please check the GeoJSON file and its path.");
         }
@@ -156,15 +154,12 @@ function highlightSelectedLocations() {
     map.data.setStyle((feature) => {
         const featureId = `${feature.getProperty('ID_3')}`;
 
-        console.log(selectedLocations);
-        console.log("Checking Feature ID:", featureId);
-
         if (selectedLocations.has(featureId)) {
             return {
-                fillColor: '#FF0000',
-                strokeColor: '#FF0000',
+                fillColor: '#ff7b07',
+                strokeColor: '#ff7b07',
                 strokeWeight: 1.5,
-                fillOpacity: 0.5
+                fillOpacity: 0.7
             };
         } else {
             return {

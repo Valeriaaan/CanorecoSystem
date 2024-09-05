@@ -152,7 +152,7 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
 // -------------------------------------------------- Fetch Barangays JSON data
 
 async function fetchBarangaysData() {
-    const response = await fetch('json/filtered_Barangays.json');
+    const response = await fetch('../../../resources/json/filtered_Barangays.json');
     const data = await response.json();
     return data.features.map(feature => ({
         municipalityId: feature.properties.ID_2,
@@ -318,7 +318,7 @@ async function initMap() {
     });
 
     // Load the GeoJSON data for the barangays
-    map.data.loadGeoJson('json/filtered_Barangays.json', null, (features) => {
+    map.data.loadGeoJson('../../../resources/json/filtered_Barangays.json', null, (features) => {
         if (features.length === 0) {
             console.error("No features were loaded. Please check the GeoJSON file and its path.");
         }
@@ -375,10 +375,10 @@ function highlightSelectedLocations() {
         const featureId = `${feature.getProperty('ID_2')}-${feature.getProperty('ID_3')}`;
         if (selectedLocations.has(featureId)) {
             return {
-                fillColor: '#FF0000',
-                strokeColor: '#FF0000', 
-                strokeWeight: 1.5, 
-                fillOpacity: 0.5 
+                fillColor: '#ff7b07',
+                strokeColor: '#ff7b07',
+                strokeWeight: 1.5,
+                fillOpacity: 0.7
             };
         } else {
             return {
