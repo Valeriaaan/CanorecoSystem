@@ -70,7 +70,8 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
                     category: newsCategory,
                     selectedLocations: "",
                     timestamp: timestamp,
-                    image: imageUrls
+                    image: imageUrls, 
+                    status: ""
                 });
 
                 Swal.fire('Saved!', 'The news has been saved successfully.', 'success').then(() => {

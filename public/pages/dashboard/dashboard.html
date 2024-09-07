@@ -173,10 +173,11 @@
                                 <div class="col-12">
                                     <div class="card shadow-sm">
 
-                                        <div class="card-header d-flex justify-content-between align-items-center">
-                                            <span>Outage Map</span>
 
-                                            <ul class="nav nav-underline">
+                                        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center">
+                                            <span class="mb-2 mb-lg-0">Outage Map</span>
+                                        
+                                            <ul class="nav nav-underline flex-nowrap overflow-auto">
                                                 <li class="nav-item">
                                                     <a class="nav-link active text-dark" id="current-outages-tab" href="#currentOutages" aria-current="page" data-bs-toggle="tab" data-bs-target="#current-outages">Current Outages</a>
                                                 </li>
@@ -188,7 +189,8 @@
                                         
                                         <div class="card-body text-end">
                                             <div class="position-relative">
-                                                <div id="map" style="height: 50vh;"></div>
+
+                                                <div id="map" class="rounded" style="height: 50vh;"></div>
                                                 
                                                 <!-- Legend Toggle Button -->
                                                 <button class="btn btn-light position-absolute top-0 end-0 m-2 p-3 py-2" type="button" data-bs-toggle="collapse" data-bs-target="#mapLegend" aria-expanded="false" aria-controls="mapLegend">
@@ -211,6 +213,13 @@
                                                     </div>
                                                 </div>
 
+                                                <!-- Loading Overlay -->
+                                                <div id="mapLoadingOverlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75 d-none">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                </div>
+                                                
                                             </div>
                                             
                                             <a href="../outage/outage.html" class="fw-medium btn btn-sm text-primary mt-3">

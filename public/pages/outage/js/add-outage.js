@@ -116,7 +116,8 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                     category: "Patalastas ng Power Interruption",
                     selectedLocations: selectedLocationsArray,
                     timestamp: timestamp,
-                    image: imageUrls
+                    image: imageUrls, 
+                    status: ""
                 });
 
                 await setDoc(doc(newsCollectionRef, timestamp), {
@@ -129,7 +130,8 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                     category: "Patalastas ng Power Interruption",
                     selectedLocations: selectedLocationsArray,
                     timestamp: timestamp,
-                    image: imageUrls
+                    image: imageUrls, 
+                    status: ""
                 });
 
                 // Close the loading Swal and show success message

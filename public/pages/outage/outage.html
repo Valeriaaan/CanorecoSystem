@@ -99,14 +99,24 @@
                                     </li>
                                 </ol>
                             </nav>
-                            
-                            <div class="mb-3">
+
+                            <div class="input-group mb-3">
                                 <input type="text" class="form-control" id="searchInput" placeholder="Search by title..." aria-label="Search by title">
+                                <select class="form-select text-muted" id="outageFilter">
+                                    <option value="current">Current Outages</option>
+                                    <option value="future">Future Outages</option>
+                                </select>
                             </div>
 
                             <div class="row">
+                                <!-- Empty State -->
+                                <div id="emptyState" class="text-center" style="display: none;">
+                                    <img src="path/to/empty-image.png" alt="No Outage Available" class="img-fluid my-4" />
+                                    <p>No outage available at the moment. Please check back later.</p>
+                                </div>
+
                                 <div class="left-container overflow-y-auto mb-3 py-1" id="outagesContainer">
-                                        <!-- Location cards will be added dynamically here -->
+                                    <!-- Location cards will be added dynamically here -->
                                 </div>
                             </div>
                            
@@ -120,7 +130,7 @@
                                     <i class="fas fa-calendar d-inline d-sm-none"></i>
                                 </a>
                             </div>
-                                         
+                            
                             <!-- Loading Spinner -->
                             <div id="loadingSpinner" class="d-flex justify-content-center align-items-center m-5">
                                 <div class="spinner-border text-primary" role="status">
@@ -129,6 +139,7 @@
                             </div>
 
                             <div class="rounded mb-5 mx-3" id="map"></div>
+                            
                         </div>
                         
                     </div>

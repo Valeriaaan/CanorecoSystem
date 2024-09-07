@@ -5,8 +5,9 @@ import { collection, getDocs, query, where } from "https://www.gstatic.com/fireb
 import { formatDate } from '../../../resources/js/main.js';
 
 let map;
+let tooltip;
 const outagesCollection = collection(firestore, 'outages');
-const selectedLocations = new Map(); // Change Set to Map to store location IDs and names
+const selectedLocations = new Map(); 
 
 // Get the current date and time
 const currentDate = new Date();
@@ -34,13 +35,26 @@ async function fetchOutageCount() {
         const outageCollectionRef = collection(firestore, 'outages');
         const outageQuery = query(outageCollectionRef, where("category", "==", "Patalastas ng Power Interruption"));
         const outageSnapshot = await getDocs(outageQuery);
-        const outageCount = outageSnapshot.size;
+        let outageCount = 0; // Initialize a counter for valid outages
+
+        outageSnapshot.forEach((doc) => {
+            const outage = doc.data();
+            const outageDate = outage.date; // Outage date in YYYY-MM-DD format
+            const outageStartTime = parseInt(outage.startTime.replace(':', '')); // Convert HH:MM to HHMM
+            const outageEndTime = parseInt(outage.endTime.replace(':', '')); // Convert HH:MM to HHMM
+
+            // Check if the outage is in the future or today but hasn't passed the end time
+            if (outageDate > formattedDate || (outageDate === formattedDate && currentTime <= outageEndTime)) {
+                outageCount++; // Only count outages that haven't passed yet
+            }
+        });
 
         document.getElementById('outagesCount').innerText = outageCount;
     } catch (error) {
         console.error("Error fetching outage count:", error);
     }
 }
+
 
 // -------------------------------------------------- Fetch and Display News
 
@@ -137,7 +151,45 @@ async function initMap() {
         };
     });
 
-    // Initial highlight of selected locations
+    // Create a tooltip div for showing the location name
+    tooltip = document.createElement('div');
+    tooltip.style.position = 'absolute';
+    tooltip.style.padding = '5px';
+    tooltip.style.backgroundColor = '#fff';
+    tooltip.style.border = '1px solid #ccc';
+    tooltip.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.display = 'none'; // Hidden by default
+    document.body.appendChild(tooltip);
+
+    // Add mouseover event for tooltips only for selected (highlighted) locations
+    map.data.addListener('mouseover', (event) => {
+        const featureId = `${event.feature.getProperty('ID_3')}`;
+    
+        // Show tooltip only for highlighted locations
+        if (selectedLocations.has(featureId)) {
+            const locationDetails = selectedLocations.get(featureId);
+            const locationName = locationDetails.name;
+            const outageId = locationDetails.outageId; 
+            const outageGawain= locationDetails.outageGawain; 
+    
+            tooltip.innerText = `${locationName}(Outage Gawain: ${outageGawain})`;
+            tooltip.style.left = event.domEvent.pageX + 'px';
+            tooltip.style.top = event.domEvent.pageY + 'px';
+            tooltip.style.display = 'block'; 
+        }
+    });
+
+    // Add mouseout event to hide the tooltip
+    map.data.addListener('mouseout', (event) => {
+        const featureId = `${event.feature.getProperty('ID_3')}`;
+
+        // Hide tooltip only if it was for a highlighted location
+        if (selectedLocations.has(featureId)) {
+            tooltip.style.display = 'none'; 
+        }
+    });
+
     highlightSelectedLocations();
 }
 
@@ -146,12 +198,20 @@ function highlightSelectedLocations() {
         const featureId = `${feature.getProperty('ID_3')}`;
 
         if (selectedLocations.has(featureId)) {
+            const outageType = selectedLocations.get(featureId).type; 
+            let fillColor = '#dc3545'; 
+            
+            if (outageType === 'future') {
+                fillColor = '#ff7b07';
+            }
+
             return {
-                fillColor: '#ff7b07',
-                strokeColor: '#ff7b07',
+                fillColor: fillColor,
+                strokeColor: fillColor,
                 strokeWeight: 1.5,
                 fillOpacity: 0.7
             };
+            
         } else {
             return {
                 fillColor: '#810FCB',
@@ -178,16 +238,17 @@ async function fetchFilteredOutages(isCurrentOutages) {
     selectedLocations.clear();
 
     outagesSnapshot.forEach((doc) => {
+        const outageId = doc.id; 
         const outage = doc.data();
-        const outageDate = outage.date; // Outage date in YYYY-MM-DD
+        const outageDate = outage.date;
+        const outageGawain = outage.gawain; 
         const outageStartTime = parseInt(outage.startTime.replace(':', '')); // Convert HH:MM to HHMM
         const outageEndTime = parseInt(outage.endTime.replace(':', '')); // Convert HH:MM to HHMM
 
-        console.log(`Processing outage on ${outageDate} from ${outageStartTime} to ${outageEndTime}`);
+        console.log(`Processing outage on ${outage.title} ${outageDate} from ${outageStartTime} to ${outageEndTime}`);
         console.log(`Current Date: ${formattedDate}`);
         console.log(`Current Time: ${currentTime}`);
         
-
         if (isCurrentOutages) {
             // Check if outage is today and within the current time range
             if (outageDate === formattedDate && currentTime >= outageStartTime && currentTime <= outageEndTime) {
@@ -195,23 +256,25 @@ async function fetchFilteredOutages(isCurrentOutages) {
                 outage.selectedLocations.forEach(location => {
                     const locationName = getLocationName(location, barangaysData);
                     if (locationName) {
-                        selectedLocations.set(location, locationName);
-                        console.log(`Adding location ID: ${location} (${locationName})`);
+                        selectedLocations.set(location, { name: locationName, type: 'current', outageId, outageGawain });
+                        console.log(`Adding location ID: ${location} (${locationName}) for outage ${outageId}`);
                     }
                 });
             }
+            
         } else {
-            // Check if outage is in the future
-            if (outageDate > formattedDate) {
+            // Check if the outage is in the future or later today
+            if (outageDate > formattedDate || (outageDate === formattedDate && currentTime < outageStartTime)) {
                 console.log(`Future outage detected: ${outageDate}`);
                 outage.selectedLocations.forEach(location => {
                     const locationName = getLocationName(location, barangaysData);
                     if (locationName) {
-                        selectedLocations.set(location, locationName);
-                        console.log(`Adding location ID: ${location} (${locationName})`);
+                        selectedLocations.set(location, { name: locationName, type: 'future', outageId, outageGawain }); 
+                        console.log(`Adding location ID: ${location} (${locationName}) for future outage ${outageId}`);
                     }
                 });
             }
+
         }
     });
 
@@ -220,13 +283,19 @@ async function fetchFilteredOutages(isCurrentOutages) {
 
 // -------------------------------------------------- Tab Click Event Handlers
 
+// Example of showing the spinner during data fetching
 document.querySelector('.nav-link[href="#currentOutages"]').addEventListener('click', async () => {
-    await fetchFilteredOutages(true); // Show current outages
+    document.getElementById('mapLoadingOverlay').classList.remove('d-none');
+    await fetchFilteredOutages(true); // Fetch current outages
+    document.getElementById('mapLoadingOverlay').classList.add('d-none');
 });
 
 document.querySelector('.nav-link[href="#futureOutages"]').addEventListener('click', async () => {
-    await fetchFilteredOutages(false); // Show future outages
+    document.getElementById('mapLoadingOverlay').classList.remove('d-none');
+    await fetchFilteredOutages(false); // Fetch future outages
+    document.getElementById('mapLoadingOverlay').classList.add('d-none');
 });
+
 
 // -------------------------------------------------- Initialize and Fetch Data
 
@@ -251,7 +320,7 @@ async function initializeDashboard() {
         await fetchComplaintsCount();
         await fetchOutageCount();
         await fetchNews();  
-        await fetchFilteredOutages(true); // Load current outages by default
+        await fetchFilteredOutages(true); 
     
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('mainContainer').classList.remove('d-none');
