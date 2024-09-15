@@ -7,7 +7,7 @@ import { collection, getDocs, query, where, doc, deleteDoc, getDoc, updateDoc } 
 
 async function fetchData() {
     const usersCollection = collection(firestore, 'users');
-    const membersQuery = query(usersCollection, where('userType', '==', 'member'));
+    const membersQuery = query(usersCollection, where('userType', '==', 'linemen'));
 
     try {
         const querySnapshot = await getDocs(membersQuery);
@@ -22,7 +22,7 @@ async function fetchData() {
         populateTable(data);
 
         
-        document.getElementById('consumersTable').classList.remove('d-none');
+        document.getElementById('employeeTable').classList.remove('d-none');
         document.getElementById('loadingSpinner').classList.add('d-none');
     } catch (error) {
         console.error("Error fetching documents: ", error);
@@ -32,11 +32,11 @@ async function fetchData() {
 // -------------------------------------------------- Function to populate the DataTable
 
 function populateTable(data) {
-    if ($.fn.DataTable.isDataTable('#consumersTable')) {
-        $('#consumersTable').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#employeeTable')) {
+        $('#employeeTable').DataTable().destroy();
     }
 
-    $('#consumersTable').DataTable({
+    $('#employeeTable').DataTable({
         responsive: true,
         columnDefs: [
             { responsivePriority: 1, targets: 0 },
@@ -44,6 +44,15 @@ function populateTable(data) {
         ],
         data: data,
         columns: [
+            {
+                data: 'profilePicture', 
+                title: 'Profile Picture',
+                className: 'text-start',
+                render: function (data) {
+                    const imgUrl = data || 'path/to/default-profile-pic.jpg';
+                    return `<img src="${imgUrl}" alt="Profile" style="width: 50px; height: 50px; object-fit: cover;">`;
+                }
+            },
             {
                 data: null,
                 title: 'Name',
@@ -56,6 +65,7 @@ function populateTable(data) {
             },
             { data: 'email', title: 'Email', className: 'text-start' },
             { data: 'phone', title: 'Contact Number', className: 'text-start'  },
+            { data: 'area', title: 'Area', className: 'text-start'  },
             {
                 data: 'access',
                 title: 'Access',
@@ -85,19 +95,19 @@ function populateTable(data) {
     });
 
     // Event listeners for buttons (Edit, Delete)
-    $('#consumersTable tbody').on('click', '.edit-btn', function () {
+    $('#employeeTable tbody').on('click', '.edit-btn', function () {
         const id = $(this).data('id');
         handleEdit(id);
     });
 
-    $('#consumersTable tbody').on('click', '.delete-btn', function () {
+    $('#employeeTable tbody').on('click', '.delete-btn', function () {
         const id = $(this).data('id');
         handleDelete(id);
     });
 
     // Event listener for Access cell click
-    $('#consumersTable tbody').on('click', 'td:nth-child(6)', function () {
-        const table = $('#consumersTable').DataTable();
+    $('#employeeTable tbody').on('click', 'td:nth-child(6)', function () {
+        const table = $('#employeeTable').DataTable();
         const rowData = table.row(this).data();
         handleAccessChange(rowData.id, rowData.access);
     });
@@ -196,7 +206,7 @@ async function handleDelete(id) {
             }
 
             Swal.fire('Deleted!', 'The user has been deleted.', 'success');
-            $('#consumersTable').DataTable().ajax.reload();
+            $('#employeeTable').DataTable().ajax.reload();
 
         } catch (error) {
             console.error("Error deleting user: ", error);

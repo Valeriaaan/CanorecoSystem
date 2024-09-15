@@ -16,6 +16,8 @@ onAuthStateChanged(auth, (user) => {
 
 async function displayUserDetails(uid) {
     try {
+        
+        includeHTML();
         const userDocRef = doc(firestore, 'users', uid);
         const userDocSnapshot = await getDoc(userDocRef);
 
@@ -57,9 +59,6 @@ async function includeHTML() {
         console.error('Error fetching HTML files:', error);
     }
 }
-
-// Call the function on page load
-window.addEventListener('DOMContentLoaded', includeHTML);
 
 // -------------------------------------------------- Enable Bootstrap Popovers
 

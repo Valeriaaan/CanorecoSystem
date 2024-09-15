@@ -105,7 +105,6 @@ function displayOutageCards(outages) {
     }
 }
 
-
 // -------------------------------------------------- Initialize Map
 
 async function initMap() {
@@ -175,6 +174,7 @@ async function fetchFilteredOutages(isCurrentOutages) {
 
     outagesSnapshot.forEach((doc) => {
         const outage = doc.data();
+        const outageId = doc.id;
         const outageDate = outage.date;
         const outageStartTime = parseInt(outage.startTime.replace(':', '')); 
         const outageEndTime = parseInt(outage.endTime.replace(':', '')); 
@@ -200,7 +200,7 @@ async function fetchFilteredOutages(isCurrentOutages) {
                     selectedLocations.set(location, locationName);
                 }
             });
-            filteredOutages.push(outage);
+            filteredOutages.push({ id: outageId, ...outage });
         }
     });
 
@@ -244,7 +244,7 @@ function setupSearchBar() {
 window.deleteOutage = async (id) => {
     const result = await Swal.fire({
         title: 'Are you sure?',
-        text: `Do you really want to delete this scheduled outage"?`,
+        text: `Do you really want to delete this scheduled outage?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Delete',
@@ -255,6 +255,16 @@ window.deleteOutage = async (id) => {
     });
 
     if (result.isConfirmed) {
+
+        Swal.fire({
+            title: 'Deleting...',
+            text: 'Please wait while the outage is being deleted.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         try {
             const outageDocRef = doc(firestore, 'outages', id);
             await deleteDoc(outageDocRef);
@@ -269,6 +279,7 @@ window.deleteOutage = async (id) => {
             const outageFilter = document.getElementById('outageFilter');
             const isCurrentOutages = outageFilter.value === 'current';
             await fetchFilteredOutages(isCurrentOutages);
+            
         } catch (error) {
             console.error('Error deleting outage:', error);
             Swal.fire({

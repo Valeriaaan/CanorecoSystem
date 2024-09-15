@@ -279,11 +279,22 @@ function deleteNews(newsCard, docId) {
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Delete'
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Delete',
+            reverseButtons: true
         });
-
+ 
         if (result.isConfirmed) {
+            
+            Swal.fire({
+                title: 'Deleting...',
+                text: 'Please wait while the news is being deleted.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 await deleteDoc(doc(firestore, "news", docId));
                 newsCard.remove();

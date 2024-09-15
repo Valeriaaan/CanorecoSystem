@@ -28,9 +28,9 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
     try {
         let q;
         if (categoryFilter) {
-            q = query(collection(firestore, "complaints"), where("category", "==", categoryFilter));
+            q = query(collection(firestore, "consumer_complaints"), where("category", "==", categoryFilter));
         } else {
-            q = collection(firestore, "complaints");
+            q = collection(firestore, "consumer_complaints");
         }
 
         const querySnapshot = await getDocs(q);
@@ -80,7 +80,7 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
 function renderComplaintCard(complaint, container) {
     const docId = complaint.id;
     const date = formatDate(complaint.timestamp);
-    const trimmedContent = complaint.content.length > 150 ? complaint.content.substring(0, 150) + '...' : complaint.content;
+    const trimmedContent = complaint.concernDescription.length > 150 ? complaint.concernDescription.substring(0, 150) + '...' : complaint.content;
 
     const complaintCard = document.createElement("div");
     complaintCard.classList.add("complaint-card", "border-bottom", "mb-1", "p-2");
@@ -89,8 +89,8 @@ function renderComplaintCard(complaint, container) {
     complaintCard.innerHTML = `
         <div class="card-body position-relative">
             <a href="view-complaints.html?id=${docId}" class="text-decoration-none text-dark d-block">
-                <span class="badge bg-primary position-absolute top-0 start-0 m-3">${complaint.category}</span>
-                <h5 class="card-title mt-4 pt-2">${complaint.title}</h5>
+                <span class="badge bg-primary position-absolute top-0 start-0 m-3">${complaint.concernDescription}</span>
+                <h5 class="card-title mt-4 pt-2">${complaint.concern}</h5>
                 <p class="card-text">${trimmedContent}</p>
             </a>
             <div class="dropdown position-absolute top-0 end-0 m-3">
@@ -276,7 +276,7 @@ function deleteComplaint(cardElement, docId) {
 
         if (result.isConfirmed) {
             try {
-                await deleteDoc(doc(firestore, "complaints", docId));
+                await deleteDoc(doc(firestore, "consumer_complaints", docId));
                 cardElement.remove(); // Remove the card from the UI
                 Swal.fire('Deleted!', 'The complaint has been deleted.', 'success');
             } catch (error) {

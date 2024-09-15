@@ -75582,6 +75582,90 @@
                     ]
                 ]
             }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "ID_0": 177,
+                "ISO": "PHL",
+                "NAME_0": "Philippines",
+                "ID_1": 19,
+                "NAME_1": "Camarines Norte",
+                "ID_2": 344,
+                "NAME_2": "Daet",
+                "ID_3": 9000,
+                "NAME_3": "CNSC_ICS_BLDG",
+                "NL_NAME_3": "",
+                "VARNAME_3": "",
+                "TYPE_3": "Barangay",
+                "ENGTYPE_3": "Village",
+                "PROVINCE": "Camarines Norte",
+                "REGION": "Bicol Region (Region V)"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            122.956706, 14.109420
+                        ],
+                        [
+                            122.956820, 14.109428
+                        ],
+                        [
+                            122.956843, 14.109044
+                        ],
+                        [
+                            122.956729, 14.109039
+                        ],
+                        [
+                            122.956706, 14.109420
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "ID_0": 177,
+                "ISO": "PHL",
+                "NAME_0": "Philippines",
+                "ID_1": 19,
+                "NAME_1": "Camarines Norte",
+                "ID_2": 344,
+                "NAME_2": "Daet",
+                "ID_3": 9001,
+                "NAME_3": "CNSC_CAS_BLDG",
+                "NL_NAME_3": "",
+                "VARNAME_3": "",
+                "TYPE_3": "Barangay",
+                "ENGTYPE_3": "Village",
+                "PROVINCE": "Camarines Norte",
+                "REGION": "Bicol Region (Region V)"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            122.957537, 14.109655
+                        ],
+                        [
+                            122.957543, 14.109545
+                        ],
+                        [
+                            122.956708, 14.109509
+                        ],
+                        [
+                            122.956698, 14.109622
+                        ],
+                        [
+                            122.957537, 14.109655
+                        ]
+                    ]
+                ]
+            }
         }
     ]
 }

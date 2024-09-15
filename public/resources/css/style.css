@@ -30,8 +30,20 @@ body {
 
 /* Side Navigation Bar */
 
-.side-navigation , .top-nav {
+.side-navigation {
     background-color: white;
+}
+
+.top-nav {
+    background-color: #222831;
+}
+
+.top-nav a {
+    color: #E6E0E9;
+}
+
+.top-nav a:hover {
+    color: #ffffff;
 }
 
 .side-navigation .nav-link{

@@ -1,7 +1,8 @@
 // -------------------------------------------------- Firebase Imports
 
-import { firestore } from '../../../resources/js/config.js';
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { firestore, database } from '../../../resources/js/config.js';
+import { collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { ref, get, child, onValue,  } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js"; 
 import { formatDate } from '../../../resources/js/main.js';
 
 let map;
@@ -16,73 +17,95 @@ const currentTime = currentDate.getHours() * 100 + currentDate.getMinutes(); // 
 
 // -------------------------------------------------- Fetch Complaints Count
 
-async function fetchComplaintsCount() {
-    try {
-        const complaintsCollectionRef = collection(firestore, 'Reports');
-        const complaintsSnapshot = await getDocs(complaintsCollectionRef);
-        const complaintsCount = complaintsSnapshot.size; 
-
+function listenToComplaintsCount() {
+    const complaintsCollectionRef = collection(firestore, 'consumer_complaints');
+    
+    onSnapshot(complaintsCollectionRef, (snapshot) => {
+        const complaintsCount = snapshot.size;
+        console.log("Complaints count: ", complaintsCount);
         document.getElementById('complaintsCount').innerText = complaintsCount;
-    } catch (error) {
-        console.error("Error fetching complaints count:", error);
-    }
+    }, (error) => {
+        console.error("Error listening to complaints count:", error);
+    });
+    
 }
 
 // -------------------------------------------------- Fetch Outage Count 
 
-async function fetchOutageCount() {
-    try {
-        const outageCollectionRef = collection(firestore, 'outages');
-        const outageQuery = query(outageCollectionRef, where("category", "==", "Patalastas ng Power Interruption"));
-        const outageSnapshot = await getDocs(outageQuery);
-        let outageCount = 0; // Initialize a counter for valid outages
+function listenToOutages() {
+    const outageCollectionRef = collection(firestore, 'outages');
+    const outageQuery = query(outageCollectionRef, where("category", "==", "Patalastas ng Power Interruption"));
 
-        outageSnapshot.forEach((doc) => {
+    onSnapshot(outageQuery, (snapshot) => {
+        let outageCount = 0;
+
+        snapshot.forEach((doc) => {
             const outage = doc.data();
-            const outageDate = outage.date; // Outage date in YYYY-MM-DD format
-            const outageStartTime = parseInt(outage.startTime.replace(':', '')); // Convert HH:MM to HHMM
-            const outageEndTime = parseInt(outage.endTime.replace(':', '')); // Convert HH:MM to HHMM
-
-            // Check if the outage is in the future or today but hasn't passed the end time
+            const outageDate = outage.date;
+            const outageEndTime = parseInt(outage.endTime.replace(':', ''));
+            
             if (outageDate > formattedDate || (outageDate === formattedDate && currentTime <= outageEndTime)) {
-                outageCount++; // Only count outages that haven't passed yet
+                outageCount++;
             }
         });
 
         document.getElementById('outagesCount').innerText = outageCount;
-    } catch (error) {
-        console.error("Error fetching outage count:", error);
-    }
+    }, (error) => {
+        console.error("Error listening to outages:", error);
+    });
 }
 
+// -------------------------------------------------- Fetch Interruption Count 
+
+// Real-time listener for damaged devices in Realtime Database
+function listenToDamagedDevices() {
+    const devicesRef = ref(database, 'devices');
+    
+    onValue(devicesRef, (snapshot) => {
+        let damagedCount = 0;
+        
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+                const deviceData = childSnapshot.val();
+                
+                if (deviceData.status === "damaged") {
+                    damagedCount++;
+                }
+            });
+        }
+        
+        document.getElementById('interruptionsCount').innerText = damagedCount;
+    }, (error) => {
+        console.error("Error listening to damaged devices:", error);
+    });
+}
 
 // -------------------------------------------------- Fetch and Display News
 
-async function fetchNews() {
-    try {
-        const newsCollectionRef = collection(firestore, 'news');
-        const newsQuery = query(newsCollectionRef); // You can add orderBy or limit as needed
-        const newsSnapshot = await getDocs(newsQuery);
-
+function listenToNews() {
+    const newsCollectionRef = collection(firestore, 'news');
+    const newsQuery = query(newsCollectionRef); // Add any necessary filters or ordering here
+    
+    onSnapshot(newsQuery, (snapshot) => {
         const newsContainer = document.getElementById('newsContainer');
         newsContainer.style.cursor = "pointer"; 
         newsContainer.innerHTML = '';
 
         let newsCount = 0;
 
-        newsSnapshot.forEach((doc) => {
+        snapshot.forEach((doc) => {
             if (newsCount >= 5) return; 
 
             const newsData = doc.data();
             const newsId = doc.id;
             const date = formatDate(newsData.timestamp);
-            const trimmedTitle = newsData.title.length > 30 ? newsData.title.substring(0, 30) + '...' : newsData.title;
+            const trimmedTitle = newsData.title.length > 40 ? newsData.title.substring(0, 40) + '...' : newsData.title;
 
             const newsItem = `
                 <div class="news-card rounded mb-2 p-3">
                     <a href="../news/view-news.html?id=${newsId}" class="text-decoration-none text-dark">
                         <div class="">
-                            <h5 class="card-title">${trimmedTitle}</h5>
+                            <h6 class="card-title">${trimmedTitle}</h6>
                             <span class="far fa-calendar text-muted mx-1"></span><small class="text-muted">${date}</small>
                         </div>
                     </a>
@@ -97,9 +120,9 @@ async function fetchNews() {
             newsContainer.innerHTML = '<p>No news available at the moment.</p>';
         }
 
-    } catch (error) {
-        console.error("Error fetching news:", error);
-    }
+    }, (error) => {
+        console.error("Error listening to news:", error);
+    });
 }
 
 // -------------------------------------------------- Fetch Barangays JSON data
@@ -232,54 +255,56 @@ function getLocationName(locationId, barangaysData) {
 
 async function fetchFilteredOutages(isCurrentOutages) {
     console.log(`Fetching ${isCurrentOutages ? 'current' : 'future'} outages...`);
-    const outagesSnapshot = await getDocs(outagesCollection);
     const barangaysData = await fetchBarangaysData();
 
-    selectedLocations.clear();
+    // Listen for real-time updates to the outages collection
+    onSnapshot(outagesCollection, (outagesSnapshot) => {
+        selectedLocations.clear();
 
-    outagesSnapshot.forEach((doc) => {
-        const outageId = doc.id; 
-        const outage = doc.data();
-        const outageDate = outage.date;
-        const outageGawain = outage.gawain; 
-        const outageStartTime = parseInt(outage.startTime.replace(':', '')); // Convert HH:MM to HHMM
-        const outageEndTime = parseInt(outage.endTime.replace(':', '')); // Convert HH:MM to HHMM
+        outagesSnapshot.forEach((doc) => {
+            const outageId = doc.id;
+            const outage = doc.data();
+            const outageDate = outage.date;
+            const outageGawain = outage.gawain;
+            const outageStartTime = parseInt(outage.startTime.replace(':', '')); // Convert HH:MM to HHMM
+            const outageEndTime = parseInt(outage.endTime.replace(':', '')); // Convert HH:MM to HHMM
 
-        console.log(`Processing outage on ${outage.title} ${outageDate} from ${outageStartTime} to ${outageEndTime}`);
-        console.log(`Current Date: ${formattedDate}`);
-        console.log(`Current Time: ${currentTime}`);
-        
-        if (isCurrentOutages) {
-            // Check if outage is today and within the current time range
-            if (outageDate === formattedDate && currentTime >= outageStartTime && currentTime <= outageEndTime) {
-                console.log(`Current outage detected: ${outageDate}`);
-                outage.selectedLocations.forEach(location => {
-                    const locationName = getLocationName(location, barangaysData);
-                    if (locationName) {
-                        selectedLocations.set(location, { name: locationName, type: 'current', outageId, outageGawain });
-                        console.log(`Adding location ID: ${location} (${locationName}) for outage ${outageId}`);
-                    }
-                });
+            console.log(`Processing outage on ${outage.title} ${outageDate} from ${outageStartTime} to ${outageEndTime}`);
+            console.log(`Current Date: ${formattedDate}`);
+            console.log(`Current Time: ${currentTime}`);
+
+            if (isCurrentOutages) {
+                // Check if outage is today and within the current time range
+                if (outageDate === formattedDate && currentTime >= outageStartTime && currentTime <= outageEndTime) {
+                    console.log(`Current outage detected: ${outageDate}`);
+                    outage.selectedLocations.forEach(location => {
+                        const locationName = getLocationName(location, barangaysData);
+                        if (locationName) {
+                            selectedLocations.set(location, { name: locationName, type: 'current', outageId, outageGawain });
+                            console.log(`Adding location ID: ${location} (${locationName}) for outage ${outageId}`);
+                        }
+                    });
+                }
+            } else {
+                // Check if the outage is in the future or later today
+                if (outageDate > formattedDate || (outageDate === formattedDate && currentTime < outageStartTime)) {
+                    console.log(`Future outage detected: ${outageDate}`);
+                    outage.selectedLocations.forEach(location => {
+                        const locationName = getLocationName(location, barangaysData);
+                        if (locationName) {
+                            selectedLocations.set(location, { name: locationName, type: 'future', outageId, outageGawain });
+                            console.log(`Adding location ID: ${location} (${locationName}) for future outage ${outageId}`);
+                        }
+                    });
+                }
             }
-            
-        } else {
-            // Check if the outage is in the future or later today
-            if (outageDate > formattedDate || (outageDate === formattedDate && currentTime < outageStartTime)) {
-                console.log(`Future outage detected: ${outageDate}`);
-                outage.selectedLocations.forEach(location => {
-                    const locationName = getLocationName(location, barangaysData);
-                    if (locationName) {
-                        selectedLocations.set(location, { name: locationName, type: 'future', outageId, outageGawain }); 
-                        console.log(`Adding location ID: ${location} (${locationName}) for future outage ${outageId}`);
-                    }
-                });
-            }
+        });
 
-        }
+        // Update the map with the highlighted selected locations
+        highlightSelectedLocations();
     });
-
-    highlightSelectedLocations();
 }
+
 
 // -------------------------------------------------- Tab Click Event Handlers
 
@@ -316,10 +341,11 @@ async function initializeDashboard() {
             });
         });
 
+        listenToComplaintsCount();
+        listenToDamagedDevices();
+        listenToOutages();
+        listenToNews();
         await initMap();
-        await fetchComplaintsCount();
-        await fetchOutageCount();
-        await fetchNews();  
         await fetchFilteredOutages(true); 
     
         document.getElementById('loadingSpinner').classList.add('d-none');

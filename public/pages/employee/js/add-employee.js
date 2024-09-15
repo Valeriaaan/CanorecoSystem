@@ -42,16 +42,12 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async func
             profilePictureUrl = await getDownloadURL(storageReference);
         }
 
-        const messaging = getMessaging();
-        const fcmToken = await getToken(messaging, { vapidKey: 'BLCM2rGsEjKb8yV9fRE0wyS07Krynd03w5LwExidcy34Kan8EieNXkYOkcGB-mRWEOoSsCNpcXpoF-OYMBLsw7c' });
-
         const usersCollection = collection(firestore, 'users');
         const userDoc = doc(usersCollection, userId);
 
         await setDoc(userDoc, {
             uid: userId,
             email: email,
-            token: fcmToken, 
             firstName: firstName,
             lastName: lastName,
             address: address,
