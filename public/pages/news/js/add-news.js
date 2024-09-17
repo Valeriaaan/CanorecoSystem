@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore, storage } from '../../../resources/js/config.js';  
-import { collection, addDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, addDoc, setDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 // -------------------------------------------------- Add News
@@ -73,6 +73,25 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
                     image: imageUrls, 
                     status: ""
                 });
+
+                // Get all users from the 'users' collection
+                const usersCollectionRef = collection(firestore, 'users');
+                const querySnapshot = await getDocs(usersCollectionRef);
+
+                // Add notifications for all users
+                querySnapshot.forEach(async (userDoc) => {
+                    const userId = userDoc.id;  // Get the user document ID
+                    const userNotificationsRef = collection(firestore, `users/${userId}/notifications`);
+
+                    await setDoc(doc(userNotificationsRef, timestamp), {
+                        title: `New news added: ${newsTitle}`,
+                        text: `text: ${newsTitle}`,
+                        timestamp: timestamp,
+                        status: false
+                    });
+                });
+
+                console.log("notif sent");
 
                 Swal.fire('Saved!', 'The news has been saved successfully.', 'success').then(() => {
                     form.reset();

@@ -1,6 +1,6 @@
 import { auth, firestore } from './config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { doc, getDoc, collection, onSnapshot  } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 // -------------------------------------------------- Auth State Change
 
@@ -9,6 +9,7 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = '../../../index.html';
     } else {
         displayUserDetails(user.uid);
+        listenForNotifications(user.uid); 
     }
 });
 
@@ -30,6 +31,81 @@ async function displayUserDetails(uid) {
         }
     } catch (error) {
         console.error('Error fetching user data:', error);
+    }
+}
+
+// -------------------------------------------------- Listen for Notifications
+
+function listenForNotifications(uid) {
+    const userNotificationsRef = collection(firestore, `users/${uid}/notifications`);
+
+    onSnapshot(userNotificationsRef, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+                const notificationData = change.doc.data();
+                const title = notificationData.title || 'Notification'; // Default title if none exists
+                const message = notificationData.text;
+                const timestamp = notificationData.timestamp; // Assume this is in epoch format
+                showNotificationToast(title, message, timestamp);
+            }
+        });
+    });
+}
+
+// -------------------------------------------------- Show Toast Notification
+
+function showNotificationToast(title, message, timestamp) {
+    const timeElapsed = getTimeElapsed(timestamp); // Calculate time since the notification was created
+
+    const toastHTML = `
+        <div class="toast my-1" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">${title}</strong>
+                <small>${timeElapsed}</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        const newContainer = document.createElement('div');
+        newContainer.id = 'toastContainer';
+        newContainer.style.position = 'fixed';
+        newContainer.style.bottom = '20px';
+        newContainer.style.right = '20px';
+        newContainer.style.zIndex = '1050';
+        document.body.appendChild(newContainer);
+    }
+
+    const newToast = document.createElement('div');
+    newToast.innerHTML = toastHTML;
+    document.getElementById('toastContainer').appendChild(newToast);
+
+    const toastElement = new bootstrap.Toast(newToast.querySelector('.toast'));
+    toastElement.show();
+}
+
+// -------------------------------------------------- Calculate Elapsed Time
+
+function getTimeElapsed(epochTime) {
+    const now = Date.now(); // Get the current timestamp
+    const diffInSeconds = Math.floor((now - epochTime * 1000) / 1000); 
+
+    if (diffInSeconds < 60) {
+        return `${diffInSeconds} seconds ago`;
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} minutes ago`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} hours ago`;
+    } else {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} days ago`;
     }
 }
 

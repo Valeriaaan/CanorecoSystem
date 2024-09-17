@@ -45,15 +45,6 @@ function populateTable(data) {
         data: data,
         columns: [
             {
-                data: 'profilePicture', 
-                title: 'Profile Picture',
-                className: 'text-start',
-                render: function (data) {
-                    const imgUrl = data || 'path/to/default-profile-pic.jpg';
-                    return `<img src="${imgUrl}" alt="Profile" style="width: 50px; height: 50px; object-fit: cover;">`;
-                }
-            },
-            {
                 data: null,
                 title: 'Name',
                 className: 'text-start',
@@ -65,7 +56,7 @@ function populateTable(data) {
             },
             { data: 'email', title: 'Email', className: 'text-start' },
             { data: 'phone', title: 'Contact Number', className: 'text-start'  },
-            { data: 'area', title: 'Area', className: 'text-start'  },
+            { data: 'area', title: 'Designation', className: 'text-start'  },
             {
                 data: 'access',
                 title: 'Access',
@@ -106,7 +97,7 @@ function populateTable(data) {
     });
 
     // Event listener for Access cell click
-    $('#employeeTable tbody').on('click', 'td:nth-child(6)', function () {
+    $('#employeeTable tbody').on('click', 'td:nth-child(5)', function () {
         const table = $('#employeeTable').DataTable();
         const rowData = table.row(this).data();
         handleAccessChange(rowData.id, rowData.access);

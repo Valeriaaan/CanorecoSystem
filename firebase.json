@@ -1,20 +1,14 @@
 {
   "hosting": {
     "public": "public",
+    "cleanUrls": true,
+    "trailingSlash": false,
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "/pages/news",
-        "destination": "/pages/news/news.html"
-      },
-      {
-        "source": "/pages/dashboard",
-        "destination": "/pages/dashboard/index.html"
-      },
       {
         "source": "**",
         "destination": "/index.html"
