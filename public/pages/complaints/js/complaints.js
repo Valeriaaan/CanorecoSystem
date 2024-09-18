@@ -16,6 +16,8 @@ setupSearchBar();
 
 // -------------------------------------------------- Fetch Complaints
 
+// -------------------------------------------------- Fetch Complaints
+
 async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = '') {
     const complaintsContainer = document.getElementById("complaintsContainer");
     const emptyState = document.getElementById("emptyState");
@@ -26,39 +28,47 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
     loadedComplaintIds.clear();
 
     try {
-        let q;
-        if (categoryFilter) {
-            q = query(collection(firestore, "consumer_complaints"), where("category", "==", categoryFilter));
-        } else {
-            q = collection(firestore, "consumer_complaints");
+        const usersSnapshot = await getDocs(collection(firestore, "users"));
+        const userIds = usersSnapshot.docs.map(doc => doc.id);
+
+        const complaintsArray = [];
+        
+        for (const userId of userIds) {
+            const complaintsRef = collection(firestore, `users/${userId}/my_complaints`);
+            let q;
+
+            if (categoryFilter) {
+                q = query(complaintsRef, where("category", "==", categoryFilter));
+            } else {
+                q = complaintsRef;
+            }
+
+            const querySnapshot = await getDocs(q);
+
+            querySnapshot.forEach((docSnapshot) => {
+                const complaintData = { id: docSnapshot.id, userId: userId, ...docSnapshot.data() };
+                if (!searchTerm || complaintData.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    // Only add if the complaint ID is not already processed
+                    if (!loadedComplaintIds.has(complaintData.id)) {
+                        complaintsArray.push(complaintData);
+                        loadedComplaintIds.add(complaintData.id); // Track the ID to prevent duplication
+                    }
+                }
+            });
         }
 
-        const querySnapshot = await getDocs(q);
-        const totalComplaints = querySnapshot.size;
+        const totalComplaints = complaintsArray.length;
         totalPages = Math.ceil(totalComplaints / complaintsPerPage); // Update totalPages
 
         const startIndex = (page - 1) * complaintsPerPage;
         const endIndex = startIndex + complaintsPerPage;
 
-        const complaintsArray = [];
-
-        querySnapshot.forEach((docSnapshot) => {
-            const complaintData = { id: docSnapshot.id, ...docSnapshot.data() };
-            if (!searchTerm || complaintData.title.toLowerCase().includes(searchTerm.toLowerCase())) {
-                // Only add if the complaint ID is not already processed
-                if (!loadedComplaintIds.has(complaintData.id)) {
-                    complaintsArray.push(complaintData);
-                    loadedComplaintIds.add(complaintData.id); // Track the ID to prevent duplication
-                }
-            }
-        });
-
         const paginatedComplaints = complaintsArray.slice(startIndex, endIndex);
 
         // Update the complaints count display
         const displayStart = startIndex + 1;
-        const displayEnd = Math.min(endIndex, complaintsArray.length);
-        complaintsCountElement.textContent = `${displayStart}-${displayEnd} of ${complaintsArray.length}`;
+        const displayEnd = Math.min(endIndex, totalComplaints);
+        complaintsCountElement.textContent = `${displayStart}-${displayEnd} of ${totalComplaints}`;
 
         if (paginatedComplaints.length === 0) {
             emptyState.style.display = 'block';
@@ -69,13 +79,14 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
             });
         }
 
-        updatePaginationControls(complaintsArray.length, page);
+        updatePaginationControls(totalComplaints, page);
 
     } catch (error) {
         console.error("Error fetching complaints: ", error);
         Swal.fire('Error!', 'There was an error fetching the complaints.', 'error');
     }
 }
+
 
 function renderComplaintCard(complaint, container) {
     const docId = complaint.id;

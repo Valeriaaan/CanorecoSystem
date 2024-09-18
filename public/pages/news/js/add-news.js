@@ -80,18 +80,15 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
 
                 // Add notifications for all users
                 querySnapshot.forEach(async (userDoc) => {
-                    const userId = userDoc.id;  // Get the user document ID
+                    const userId = userDoc.id;
                     const userNotificationsRef = collection(firestore, `users/${userId}/notifications`);
 
                     await setDoc(doc(userNotificationsRef, timestamp), {
-                        title: `New news added: ${newsTitle}`,
-                        text: `text: ${newsTitle}`,
-                        timestamp: timestamp,
-                        status: false
+                        title: `${newsCategory}`,
+                        text: `${newsTitle}`,
+                        timestamp: timestamp
                     });
                 });
-
-                console.log("notif sent");
 
                 Swal.fire('Saved!', 'The news has been saved successfully.', 'success').then(() => {
                     form.reset();

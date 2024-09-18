@@ -59,31 +59,35 @@ function showNotificationToast(title, message, timestamp) {
 
     const toastHTML = `
         <div class="toast my-1" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">${title}</strong>
-                <small>${timeElapsed}</small>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
+                <div class="toast-header">
+                    <strong class="me-auto">${title}</strong>
+                    <small>${timeElapsed}</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
         </div>
     `;
 
-    const toastContainer = document.getElementById('toastContainer');
+    let toastContainer = document.getElementById('toastContainer');
     if (!toastContainer) {
-        const newContainer = document.createElement('div');
-        newContainer.id = 'toastContainer';
-        newContainer.style.position = 'fixed';
-        newContainer.style.bottom = '20px';
-        newContainer.style.right = '20px';
-        newContainer.style.zIndex = '1050';
-        document.body.appendChild(newContainer);
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.bottom = '20px';
+        toastContainer.style.right = '20px';
+        toastContainer.style.zIndex = '1050';
+        document.body.appendChild(toastContainer);
+    }
+
+    if (toastContainer.children.length >= 3) {
+        toastContainer.removeChild(toastContainer.firstChild); // Remove the oldest toast
     }
 
     const newToast = document.createElement('div');
     newToast.innerHTML = toastHTML;
-    document.getElementById('toastContainer').appendChild(newToast);
+    toastContainer.appendChild(newToast);
 
     const toastElement = new bootstrap.Toast(newToast.querySelector('.toast'));
     toastElement.show();

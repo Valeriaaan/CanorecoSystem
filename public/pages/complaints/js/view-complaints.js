@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore } from '../../../resources/js/config.js';
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { formatDate } from '../../../resources/js/main.js';
 
 // Get the 'id' parameter from the URL
@@ -20,19 +20,28 @@ if (complaintId) {
 
 async function fetchComplaintData(id) {
     try {
-        const complaintRef = doc(firestore, 'complaints', id);
-        const docSnap = await getDoc(complaintRef);
+        // Query all users to find the complaint
+        const usersSnapshot = await getDocs(collection(firestore, "users"));
+        
+        for (const userDoc of usersSnapshot.docs) {
+            const userId = userDoc.id;
+            const complaintRef = doc(firestore, `users/${userId}/my_complaints`, id);
+            const docSnap = await getDoc(complaintRef);
 
-        if (docSnap.exists()) {
-            // Extract data from the document
-            const complaintData = docSnap.data();
-            const { title, description, timestamp, category } = complaintData;
+            if (docSnap.exists()) {
+                // Extract data from the document
+                const complaintData = docSnap.data();
+                const { concen, concernDescription, timestamp, status } = complaintData;
 
-            // Populate the complaintContainer with complaint data
-            populateComplaintContent(title, description, timestamp, category);
-        } else {
-            console.error("No such document!");
+                // Populate the complaintContainer with complaint data
+                populateComplaintContent(concen, concernDescription, timestamp, status);
+                return; // Exit the loop once the complaint is found
+            }
         }
+        
+        // If no complaint is found
+        console.error("No such complaint found!");
+
     } catch (error) {
         console.error("Error fetching complaint:", error);
     } finally {
@@ -43,7 +52,7 @@ async function fetchComplaintData(id) {
 
 // -------------------------------------------------- Populate Content
 
-function populateComplaintContent(title, description, date, category) {
+function populateComplaintContent(concen, description, date, category) {
     // Get the complaint container element
     const complaintContainer = document.getElementById('complaintContainer');
 
@@ -53,7 +62,7 @@ function populateComplaintContent(title, description, date, category) {
             <span id="complaint-category" class="badge bg-primary">${category}</span>
         </div>
 
-        <h4 id="complaint-title" class="card-title">${title}</h4>
+        <h4 id="complaint-title" class="card-title">${concen}</h4>
 
         <span class="far fa-calendar text-muted mb-3"></span><small id="complaint-date" class="text-muted ms-2 mb-3">${formatDate(date)}</small>
 

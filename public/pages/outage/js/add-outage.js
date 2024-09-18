@@ -1,13 +1,13 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore, storage } from '../../../resources/js/config.js';  
-import { collection, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, setDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 let map;
-let selectedLocations = new Set(); // To keep track of selected locations
+let selectedLocations = new Set(); 
 
-// -------------------------------------------------- Main function to initialize everything
+// -------------------------------------------------- Main function to initialize 
 
 async function init() {
     try {
@@ -18,8 +18,11 @@ async function init() {
         autocomplete(document.getElementById('municipality'), barangaysData);
         
         // Initialize the map
-        await initMap();
+        await initMap();        
 
+        document.getElementById('loadingSpinner').classList.add('d-none');
+        document.getElementById('map').classList.remove('d-none');
+        document.getElementById('addOutageForm').classList.remove('d-none');
     } catch (error) {
         console.error('Error initializing the application:', error);
     }
@@ -32,7 +35,6 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
 
     const form = event.target;
 
-    // Get form field values
     const title = document.getElementById('title').value;
     const date = document.getElementById('date').value;
     const startTime = document.getElementById('start-time').value;
@@ -41,12 +43,10 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
     const description = document.getElementById('description').value;
     const images = document.getElementById('images').files;
 
-    // Collect the selected location IDs
     const selectedLocationsArray = Array.from(document.getElementById('selectedLocations').children).map(li => 
         li.getAttribute('data-id')
     );
 
-    // Validate the form
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
         return;
@@ -65,7 +65,6 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
         return;
     }
 
-    // Show confirmation dialog
     Swal.fire({
         title: 'Are you sure?',
         text: "Do you want to save this outage?",
@@ -134,6 +133,36 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                     status: ""
                 });
 
+                // Fetch user data from 'users' collection
+                const usersCollectionRef = collection(firestore, 'users');
+                const querySnapshot = await getDocs(usersCollectionRef);
+                const usersData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                const selectedLocationsName = Array.from(document.getElementById('selectedLocations').children).map(li => 
+                    li.getAttribute('data-municipality-id')
+                );
+
+                // Add notifications only for users whose barangay and municipality match the selected locations
+                for (const user of usersData) {
+                    const userBarangay = user.barangay || 'Not specified';
+                    const userMunicipality = user.municipality || 'Not specified';
+                    const userKey = `${userMunicipality}, ${userBarangay}`;
+
+                    if (selectedLocationsName.includes(userKey)) {
+                        console.log(`User's Barangay: ${userBarangay}, Municipality: ${userMunicipality} matches with selected locations.`);
+
+                        const userNotificationsRef = collection(firestore, `users/${user.id}/notifications`);
+                        await setDoc(doc(userNotificationsRef, timestamp), {
+                            title: "Patalastas ng Power Interruption",
+                            text: `${title}`,
+                            timestamp: timestamp
+                        });
+                        console.log(`Notification sent to user: ${user.id}`);
+
+                    } else {
+                        console.log(`User's Barangay: ${userBarangay}, Municipality: ${userMunicipality} does not match any selected location.`);
+                    }
+                }
+
                 // Close the loading Swal and show success message
                 Swal.fire('Saved!', 'The outage has been saved successfully.', 'success').then(() => {
                     form.reset();
@@ -148,8 +177,6 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
         }
     });
 });
-
-
 
 // -------------------------------------------------- Fetch Barangays JSON data
 
@@ -197,7 +224,7 @@ function autocomplete(input, data) {
             if (nameToSearch.includes(value.toLowerCase())) {
                 const itemElement = document.createElement('div');
                 itemElement.innerHTML = `<strong>${item.municipalityName}</strong>, ${item.barangayName}`;
-                itemElement.innerHTML += `<input type='hidden' data-id='${item.barangayId}' data-municipality-id='${item.municipalityId}' value='${item.fullName}'>`;
+                itemElement.innerHTML += `<input type='hidden' data-id='${item.barangayId}' data-municipality-id='${item.fullName}' value='${item.fullName}'>`;
                 itemElement.addEventListener('click', function () {
                     const selectedItem = this.getElementsByTagName('input')[0];
                     toggleSelectedLocation(selectedItem);
@@ -206,6 +233,7 @@ function autocomplete(input, data) {
                     closeAllLists();
                 });
                 listContainer.appendChild(itemElement);
+
             }
         });
     });
