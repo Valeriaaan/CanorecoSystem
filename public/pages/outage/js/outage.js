@@ -36,72 +36,10 @@ async function init() {
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('map').classList.remove('d-none');
 
+        // Update outage count after initialization
+
     } catch (error) {
         console.error('Error initializing the application:', error);
-    }
-}
-
-// -------------------------------------------------- Fetch Barangays JSON data
-
-async function fetchBarangaysData() {
-    const response = await fetch('../../../resources/json/filtered_Barangays.json');
-    const data = await response.json();
-    return data.features.map(feature => ({
-        municipalityId: feature.properties.ID_2,
-        municipalityName: feature.properties.NAME_2,
-        barangayId: feature.properties.ID_3,
-        barangayName: feature.properties.NAME_3,
-        fullName: `${feature.properties.NAME_3}`, 
-        coordinates: feature.geometry.coordinates 
-    }));
-}
-
-// -------------------------------------------------- Get Location Name
-
-function getLocationName(locationId, barangaysData) {
-    const location = barangaysData.find(loc => `${loc.barangayId}` === locationId);
-    return location ? location.fullName : null;
-}
-
-// -------------------------------------------------- Display Outage Cards
-
-function displayOutageCards(outages) {
-    const outagesContainer = document.getElementById('outagesContainer');
-    const emptyState = document.getElementById('emptyState');
-    
-    outagesContainer.innerHTML = ''; // Clear existing cards
-    
-    if (outages.length === 0) {
-        // Show the empty state if no outages are available
-        emptyState.style.display = 'block';
-    } else {
-        // Hide the empty state and display the outage cards
-        emptyState.style.display = 'none';
-        
-        outages.forEach(outage => {
-            const affectedLocations = outage.selectedLocations.map(loc => selectedLocations.get(loc)).join(', ');
-
-            const card = document.createElement('div');
-            card.className = 'card shadow-sm mb-3';
-            card.setAttribute('data-id', outage.id);
-
-            card.innerHTML = `
-            <div class="card-body">
-                <div class="p-2">
-                    <h5 class="card-title fw-bold">${outage.title}</h5>
-                    <p class="card-text mb-0 mt-2"><strong>Gawain:</strong> ${outage.gawain}</p>
-                    <p class="card-text mb-0 mt-2"><strong>Date:</strong> ${new Date(outage.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})}</p>
-                    <p class="card-text mb-0 mt-2"><strong>Affected Locations:</strong> ${affectedLocations || 'None'}</p>
-                </div>
-                <div class="d-flex gap-2 p-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary w-50">Details</button>
-                    <button type="button" class="btn btn-sm btn-outline-danger w-50" onclick="deleteOutage('${outage.id}')">Remove</button>
-                </div>
-            </div>
-            `;
-
-            outagesContainer.appendChild(card);
-        });
     }
 }
 
@@ -139,7 +77,128 @@ async function initMap() {
     highlightSelectedLocations();
 }
 
-// -------------------------------------------------- Highlight Selected Locations
+// -------------------------------------------------- Fetch Barangays JSON data
+
+async function fetchBarangaysData() {
+    const response = await fetch('../../../resources/json/filtered_Barangays.json');
+    const data = await response.json();
+    return data.features.map(feature => ({
+        municipalityId: feature.properties.ID_2,
+        municipalityName: feature.properties.NAME_2,
+        barangayId: feature.properties.ID_3,
+        barangayName: feature.properties.NAME_3,
+        fullName: `${feature.properties.NAME_3}`, 
+        coordinates: feature.geometry.coordinates 
+    }));
+}
+
+// -------------------------------------------------- Get Location Name
+
+function getLocationName(locationId, barangaysData) {
+    const location = barangaysData.find(loc => `${loc.barangayId}` === locationId);
+    return location ? location.fullName : null;
+}
+
+// -------------------------------------------------- Display Outage Cards
+
+function displayOutageCards(outages) {
+    const outagesContainer = document.getElementById('outagesContainer');
+    const emptyState = document.getElementById('emptyState');
+    
+    outagesContainer.innerHTML = ''; // Clear existing cards
+    
+    if (outages.length === 0) {
+        // Show the empty state if no outages are available
+        emptyState.style.display = 'block';
+        document.getElementById('outagesContainer').classList.add('d-none');
+    } else {
+        // Hide the empty state and display the outage cards
+        emptyState.style.display = 'none';
+        document.getElementById('outagesContainer').classList.remove('d-none');
+        
+        outages.forEach(outage => {
+            const affectedLocations = outage.selectedLocations.map(loc => selectedLocations.get(loc)).join(', ');
+
+            const card = document.createElement('div');
+            card.className = 'card shadow-sm mb-3';
+            card.setAttribute('data-id', outage.id);
+
+            card.innerHTML = `
+            <div class="card-body" role="button">
+                <div class="p-2">
+                    <h5 class="card-title fw-bold">${outage.title}</h5>
+                    <p class="card-text mb-0 mt-2"><strong>Gawain:</strong> ${outage.gawain}</p>
+                    <p class="card-text mb-0 mt-2"><strong>Date:</strong> ${new Date(outage.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p class="card-text mb-0 mt-2"><strong>Affected Locations:</strong> ${affectedLocations || 'None'}</p>
+                </div>
+                <div class="d-flex gap-2 p-2">
+                    <a type="button" class="btn btn-sm btn-outline-primary w-50" href="edit-outage.html?id=${outage.id}">Edit</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger w-50" onclick="deleteOutage('${outage.id}')">Delete</button>
+                </div>
+            </div>
+            `;
+
+            // Add a click event listener to the card
+            card.addEventListener('click', () => {
+                highlightLocations(outage.selectedLocations);
+                highlightLocationCard(outage.id);
+            });
+
+            outagesContainer.appendChild(card);
+        });
+    }
+}
+
+// -------------------------------------------------- Update Outage Count
+
+function updateOutageCount(count, totalCount) {
+    const countElement = document.querySelector('.outage-count'); // Assuming there's an element with class 'outage-count'
+    if (countElement) {
+        countElement.textContent = `${count} of ${totalCount}`; // Update the display with the count
+    }
+}
+
+// -------------------------------------------------- Highlight Functions
+
+function highlightLocationCard(id) {
+    const locationsContainer = document.getElementById('outagesContainer');
+    const locationCards = locationsContainer.querySelectorAll('.card');
+
+    locationCards.forEach(card => {
+        card.classList.remove('highlight');  
+        if (card.getAttribute('data-id') === id) {
+            card.classList.add('highlight');  
+        }
+    });
+
+    const highlightedCard = locationsContainer.querySelector(`.card[data-id="${id}"]`);
+    if (highlightedCard) {
+        highlightedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        console.log('Highlighted card not found.');
+    }
+}
+
+function highlightLocations(locationIds) { // for Card Clicks
+    map.data.setStyle((feature) => {
+        const featureId = `${feature.getProperty('ID_3')}`;
+        if (locationIds.includes(featureId)) {
+            return {
+                fillColor: '#ff7b07',
+                strokeColor: '#ff7b07',
+                strokeWeight: 1.5,
+                fillOpacity: 0.7,
+            };
+        } else {
+            return {
+                fillColor: '#810FCB',
+                strokeColor: '#FFFFFF',
+                strokeWeight: 0,
+                fillOpacity: 0,
+            };
+        }
+    });
+}
 
 function highlightSelectedLocations() {
     map.data.setStyle((feature) => {
@@ -161,6 +220,7 @@ function highlightSelectedLocations() {
         }
     });
 }
+
 
 // -------------------------------------------------- Filter Outages by Date and Time
 
@@ -206,6 +266,7 @@ async function fetchFilteredOutages(isCurrentOutages) {
 
     highlightSelectedLocations();
     displayOutageCards(filteredOutages); 
+    updateOutageCount(filteredOutages.length, outagesSnapshot.size);
 }
 
 // -------------------------------------------------- Dropdown event listener
@@ -227,15 +288,20 @@ function setupSearchBar() {
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.toLowerCase();
         const outageCards = document.querySelectorAll('#outagesContainer .card');
+        let visibleCount = 0; // Counter for visible cards
 
         outageCards.forEach(card => {
             const gawainText = card.querySelector('.card-text strong').nextSibling.nodeValue.trim().toLowerCase();
             if (gawainText.includes(query)) {
                 card.style.display = 'block'; 
+                visibleCount++; // Increment the count for visible cards
             } else {
                 card.style.display = 'none';
             }
         });
+
+        // Update outage count based on visible cards
+        updateOutageCount(visibleCount, outageCards.length);
     });
 }
 

@@ -33,8 +33,7 @@ window.initMap = async () => {
 
 function addMarker(location, id) {
     const bayadCenterIcon = '../../resources/images/business-center-icon.png'; 
-
-
+    
     const marker = new google.maps.Marker({
         position: { lat: location.latitude, lng: location.longitude },
         map: map,
@@ -130,13 +129,28 @@ function addLocationToCard(location, id) {
     col.setAttribute('data-lng', location.longitude);
     col.setAttribute('data-id', id);
 
+    // Building the address part conditionally
+    let address = `${location.municipality}, ${location.barangay}`;
+    if (location.street) {
+        address += `, ${location.street}`;
+    }
+    if (location.unit) {
+        address += `, ${location.unit}`;
+    }
+
+    // Building the mobile number part conditionally
+    let mobileNumbers = `${location.mobile}`;
+    if (location.additionalMobile) {
+        mobileNumbers += ` / ${location.additionalMobile}`;
+    }
+
     col.innerHTML = `
         <div class="card-body" role="button">
             <div class="p-2">
                 <h5 class="card-title fw-bold">${location.locationName}</h5>
                 <p class="text-muted mb-0 mt-2"><i class="fas fa-globe fa-sm me-2"></i>${location.latitude}, ${location.longitude}</p>
-                <p class="text-muted mb-0 mt-2"><i class="fas fa-location-dot fa-sm me-2"></i>${location.municipality}, ${location.barangay}, ${location.street}, ${location.unit}</p>
-                <p class="text-muted mb-0 mt-2"><i class="fas fa-phone fa-sm me-2"></i>${location.mobile} / ${location.additionalMobile}</p>
+                <p class="text-muted mb-0 mt-2"><i class="fas fa-location-dot fa-sm me-2"></i>${address}</p>
+                <p class="text-muted mb-0 mt-2"><i class="fas fa-phone fa-sm me-2"></i>${mobileNumbers}</p>
             </div>
             <div class="d-flex gap-2 p-2">
                 <a href="edit-business-center.html?id=${id}" class="btn btn-sm btn-outline-primary w-50">Edit</a>
@@ -144,7 +158,7 @@ function addLocationToCard(location, id) {
             </div>
         </div>
     `;
-    
+
     locationsContainer.appendChild(col);
 
     col.addEventListener('click', () => {
@@ -159,6 +173,7 @@ function addLocationToCard(location, id) {
         }
     });
 }
+
 
 // -------------------------------------------------- Delete Location
 

@@ -45,24 +45,11 @@
                                 <li class="nav-item dropdown me-1">
                                     <a class="nav-link top-nav" href="#" id="navbarNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-bell"></i>
+                                        <span class="border border-light p-1 rounded-circle bg-danger" id="notificationBadge" style="position: absolute; top: 7px; right: 4.5px; display: none;"></span>
                                         <span class="d-inline d-lg-none ms-1 fw-medium">Notifications</span>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarNotifications">
-                                        <li><a class="dropdown-item" href="#">Notification 1</a></li>
-                                        <li><a class="dropdown-item" href="#">Notification 2</a></li>
-                                        <li><a class="dropdown-item" href="#">Notification 3</a></li>
-                                    </ul>
-                                </li>
-                                
-                                <li class="nav-item dropdown me-1">
-                                    <a class="nav-link top-nav" href="#" id="navbarMessages" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-envelope"></i>
-                                        <span class="d-inline d-lg-none ms-1 fw-medium">Messages</span>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarMessages">
-                                        <li><a class="dropdown-item" href="#">Message 1</a></li>
-                                        <li><a class="dropdown-item" href="#">Message 2</a></li>
-                                        <li><a class="dropdown-item" href="#">Message 3</a></li>
+                                    <ul id="notificationDropdown" class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarNotifications">
+                                        <li><p class="dropdown-item text-muted mb-0">No new notifications</p></li>
                                     </ul>
                                 </li>
 
@@ -154,7 +141,7 @@
                         </div>
 
                         <div class="d-flex flex-column col-lg-7 col-md-6 border-start bg-white pb-0">
-                            <a href="../centers/bayad-center.html" class="btn btn-secondary align-self-end m-3 px-lg-4" role="button">
+                            <a href="javascript:void(0);" onclick="window.history.back();" class="btn btn-secondary align-self-end m-3 px-lg-4" role="button">
                                 <span class="d-none d-sm-inline">Back</span>
                                 <i class="fas fa-arrow-left d-inline d-sm-none"></i>
                             </a>

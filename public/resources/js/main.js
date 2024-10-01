@@ -1,6 +1,6 @@
 import { auth, firestore } from './config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-import { doc, getDoc, collection, onSnapshot  } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { doc, getDoc, collection, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 // -------------------------------------------------- Auth State Change
 
@@ -25,7 +25,7 @@ async function displayUserDetails(uid) {
         if (userDocSnapshot.exists()) {
             const userData = userDocSnapshot.data();
             document.getElementById('userFullName').textContent = userData.firstName + ' ' +userData.lastName;
-            document.getElementById('userProfilePicture').src = userData.profilePicture;
+            document.getElementById('userProfilePicture').src = userData.image;
         } else {
             console.error('No user data found');
         }
@@ -38,23 +38,133 @@ async function displayUserDetails(uid) {
 
 function listenForNotifications(uid) {
     const userNotificationsRef = collection(firestore, `users/${uid}/notifications`);
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    const notificationBadge = document.getElementById('notificationBadge');
 
     onSnapshot(userNotificationsRef, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            if (change.type === "added") {
-                const notificationData = change.doc.data();
-                const title = notificationData.title || 'Notification'; // Default title if none exists
-                const message = notificationData.text;
-                const timestamp = notificationData.timestamp; // Assume this is in epoch format
-                showNotificationToast(title, message, timestamp);
+        let notificationCount = 0;
+
+        // Clear current dropdown content
+        notificationDropdown.innerHTML = '';
+
+        if (snapshot.empty) {
+            // Show message if no notifications
+            notificationDropdown.innerHTML = '<li><span class="dropdown-item text-dark mb-0">No new notifications</span></li>';
+            notificationBadge.style.display = 'none';
+        } else {
+            snapshot.forEach(async (doc) => {
+                const notificationData = doc.data();
+                const notificationId = doc.id;
+                const title = notificationData.title.length > 30 ? notificationData.title.substring(0, 30) + '...' : notificationData.title;
+                const message = notificationData.text || '';
+                const timestamp = notificationData.timestamp || '';
+                const status = notificationData.status;
+                const isRead = notificationData.isRead;
+
+                const backgroundClass = status === false ? 'notification-body' : '';
+
+                // Format the notification content for the dropdown
+                const notificationHTML = `
+                    <li class="notification-item m-0 py-1 ${backgroundClass}" id="notification-${notificationId}">
+                        <a class="dropdown-item text-dark" href="#">
+                            <div class="d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <strong class="me-2">${title}</strong>
+                                    <button type="button" class="btn-close ms-2" aria-label="Close" data-id="${notificationId}"></button>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <small class="me-2">${message}</small>
+                                    <small class="text-muted">${getTimeElapsed(timestamp)}</small>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider m-0"></li>
+                `;
+
+                notificationDropdown.insertAdjacentHTML('beforeend', notificationHTML);
+                notificationCount++;
+
+                // Show toast only if isRead is false
+                if (!isRead) {
+                    showNotificationToast(title, message, timestamp);
+                    await updateNotificationReadStatus(uid, notificationId); // Mark notification as read after showing toast
+                }
+            });
+            
+            // Add the "View All" button at the end of the list
+            const viewAllHTML = `
+                <li><a class="dropdown-item text-muted text-center m-0" href="../notification/notification.html">View All</a></li>
+            `;
+            notificationDropdown.insertAdjacentHTML('beforeend', viewAllHTML);
+            
+            if (notificationCount > 0) {
+                notificationBadge.style.display = 'inline-block';
+            } else {
+                notificationBadge.style.display = 'none';
             }
-        });
+
+            // Add event listeners for all dynamically added close buttons
+            const closeButtons = document.querySelectorAll('.btn-close');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const notificationId = event.target.getAttribute('data-id');
+                    deleteNotification(uid, notificationId);
+                });
+            });
+        }
     });
+}
+
+// -------------------------------------------------- Function to delete notification from Firestore
+
+async function deleteNotification(uid, notificationId) {
+    try {
+        const notificationRef = doc(firestore, `users/${uid}/notifications/${notificationId}`);
+        await deleteDoc(notificationRef);
+        // Show toast notification after deletion
+        showDeletionToast("Notification has been removed");
+    } catch (error) {
+        console.error('Error deleting notification:', error);
+    }
+}
+
+// -------------------------------------------------- Show Deletion Toast
+
+function showDeletionToast(message) {
+    const toastHTML = `
+        <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+
+    let toastContainer = document.getElementById('deletionToastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'deletionToastContainer';
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.bottom = '20px';
+        toastContainer.style.left = '20px';
+        toastContainer.style.zIndex = '1050';
+        document.body.appendChild(toastContainer);
+    }
+
+    const newToast = document.createElement('div');
+    newToast.innerHTML = toastHTML;
+    toastContainer.appendChild(newToast);
+
+    const toastElement = new bootstrap.Toast(newToast.querySelector('.toast'));
+    toastElement.show();
 }
 
 // -------------------------------------------------- Show Toast Notification
 
-function showNotificationToast(title, message, timestamp) {
+function showNotificationToast(title, message, timestamp, uid) {
     const timeElapsed = getTimeElapsed(timestamp); // Calculate time since the notification was created
 
     const toastHTML = `
@@ -91,6 +201,18 @@ function showNotificationToast(title, message, timestamp) {
 
     const toastElement = new bootstrap.Toast(newToast.querySelector('.toast'));
     toastElement.show();
+}
+
+async function updateNotificationReadStatus(uid, notificationId) {
+    try {
+        const notificationRef = doc(firestore, `users/${uid}/notifications/${notificationId}`);
+        await updateDoc(notificationRef, {
+            isRead: true
+        });
+        console.log(`Notification ${notificationId} marked as read.`);
+    } catch (error) {
+        console.error('Error updating notification read status:', error);
+    }
 }
 
 // -------------------------------------------------- Calculate Elapsed Time

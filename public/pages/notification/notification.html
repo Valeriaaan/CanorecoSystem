@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html> 
+<html>
 
 <head>
     <meta charset="UTF-8" />
@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../resources/css/style.css">
-    <title>Add News &#8211; CANORECO</title>
+    <title>Notifications &#8211; CANORECO</title>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -77,7 +77,7 @@
                 <div class="container-fluid mt-5 pt-3">
                     <div class="row p-4 pb-0">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="fw-bold">Add News</h4>
+                            <h4 class="fw-bold">Notifications</h4>
                             <a href="javascript:void(0);" onclick="window.history.back();" class="btn btn-secondary" role="button">
                                 <span class="d-none d-sm-inline">Back</span>
                                 <i class="fas fa-arrow-left d-inline d-sm-none"></i>
@@ -91,88 +91,49 @@
                                         <i class="fas fa-house fa-sm"></i><span class="visually-hidden">Home</span>
                                     </a>
                                 </li>
-                                <li class="breadcrumb-item">
-                                    <a class="link-body-emphasis fw-semibold text-decoration-none" href="news.html">News</a>
-                                </li>
                                 <li class="breadcrumb-item active" aria-current="page">
-                                    Add News
+                                    Notifications
                                 </li>
                             </ol>
                         </nav>
                     </div>
 
                     <div class="row p-4 pt-0 flex-column flex-lg-row">
-                         
+
                         <!-- News Container -->
                         <div class="card shadow-sm p-2">
                             <div class="card-body">
                                 <div class="col-lg-8 col-md-8 mx-auto">
-
-                                    <form id="addNewsForm" class="needs-validation my-3" novalidate>
-                                        
-                                        <div class="mb-3">
-                                            <label for="newsTitle" class="form-label">News Title</label>
-                                            <input type="text" class="form-control" id="newsTitle" placeholder="Enter news title" required>
-                                            <div class="invalid-feedback">
-                                                Please provide a title.
-                                            </div>
+                                    <div class="lh-lg my-3" id="newsContainer">
+                                        <!-- News content will be dynamically inserted here -->
+                                    </div>
+                                    <!-- Loading Spinner -->
+                                    <div id="loadingSpinner" class="d-flex justify-content-center align-items-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
                                         </div>
-
-                                        <div class="mb-3">
-                                            <label for="newsCategory" class="form-label">Category</label>
-                                            <select class="form-select" id="newsCategory" required>
-                                                <option value="" selected disabled>Select category</option>
-                                                <option value="Billing Rates">Billing Rates</option>
-                                                <option value="CANORECO Advisories">CANORECO Advisories</option>
-                                                <option value="CANORECO Balita">CANORECO Balita</option>
-                                                <option value="COOP Activities">COOP Activities</option>
-                                                <option value="Emergency Power Service Interruptions">Emergency Power Service Interruptions</option>
-                                                <option value="Invitation to Bid">Invitation to Bid</option>
-                                                <option value="Maintenance Activities">Maintenance Activities</option>
-                                                <option value="Notice of Vacancy">Notice of Vacancy</option>
-                                                <option value="Patalastas ng Power Interruption">Patalastas ng Power Interruption</option>
-                                                <option value="Schedules">Schedules</option>
-                                                <option value="Uncategorized">Uncategorized</option>
-                                                <option value="Consumer Complaints">Consumer Complaints</option>
-                                            </select>
-                                            <div class="invalid-feedback">
-                                                Please select a category.
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="newsContent" class="form-label">Content</label>
-                                            <textarea class="form-control" id="newsContent" rows="5" placeholder="Enter news content" required></textarea>
-                                            <div class="invalid-feedback">
-                                                Please provide news content.
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="newsImages" class="form-label">Upload Images</label>
-                                            <input type="file" class="form-control" id="newsImages" accept="image/*" multiple>
-                                            <div class="invalid-feedback">
-                                                Please upload at least one image.
-                                            </div>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-main">Add News</button>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                         
                 
                     </div>
 
                 </div>
                 
+                <!-- Footer -->
+                <!-- <footer class="mt-auto footer p-3 border-top">
+                    <p class="text-muted mb-2">© 2024 CANORECO. All Rights Reserved.</p>
+                </footer> -->
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
-    <script src="../news/js/add-news.js" type="module"></script>
+    <script src="../notification/js/notification.js" type="module"></script>
 
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

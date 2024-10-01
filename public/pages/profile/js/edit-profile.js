@@ -1,7 +1,8 @@
 // -------------------------------------------------- Firebase Imports
-import { firestore, auth } from '../../../resources/js/config.js';  
+import { firestore, auth, storage } from '../../../resources/js/config.js';  
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { updateProfile, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 import { formatMobileNumber } from '../../../resources/js/main.js'; 
 
 
@@ -25,17 +26,15 @@ async function loadUserProfile(user) {
             const data = docSnap.data();
 
             // Populate form fields with existing data
-            document.getElementById('userPicture').src = data.profilePicture || 'https://github.com/mdo.png';
+            document.getElementById('userPicture').src = data.image || 'https://github.com/mdo.png';
             document.getElementById('userName').textContent = data.firstName + ' ' + data.lastName;
-            document.getElementById('userRole').textContent = data.role || '';
+            document.getElementById('userRole').textContent = data.userType || '';
 
-            document.getElementById('profilePicturePreview').src = data.profilePicture || 'https://github.com/mdo.png';
+            document.getElementById('profilePicturePreview').src = data.image || 'https://github.com/mdo.png';
             document.getElementById('editFirstName').value = data.firstName || '';
             document.getElementById('editLastName').value = data.lastName || '';
-            document.getElementById('editEmail').value = data.email || '';
-            document.getElementById('editMobileNumber').value = data.mobileNumber || '';
+            document.getElementById('editMobileNumber').value = data.phone || '';
 
-            
             // Hide the loading spinner and show the news container
             document.getElementById('loadingSpinner').classList.add('d-none');
             document.getElementById('profileContent').classList.remove('d-none');
@@ -63,9 +62,9 @@ document.getElementById('editProfilePicture').addEventListener('change', functio
 // -------------------------------------------------- Upload Profile Picture
 
 async function uploadProfilePicture(file) {
-    const storageRef = firebase.storage().ref(`profile_pictures/${file.name}`);
-    const snapshot = await storageRef.put(file);
-    return await snapshot.ref.getDownloadURL();
+    const storageRef = ref(storage, `profile_pictures/${file.name}`);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
 }
 
 // -------------------------------------------------- Format Mobile Number Inputs
@@ -89,7 +88,6 @@ document.getElementById('editProfileForm').addEventListener('submit', async func
         if (user) {
             const firstName = document.getElementById('editFirstName').value;
             const lastName = document.getElementById('editLastName').value;
-            const email = document.getElementById('editEmail').value;
             const mobileNumber = document.getElementById('editMobileNumber').value;
             const profilePicture = document.getElementById('editProfilePicture').files[0];
 
@@ -123,15 +121,8 @@ document.getElementById('editProfileForm').addEventListener('submit', async func
                     await updateDoc(docRef, {
                         firstName: firstName,
                         lastName: lastName,
-                        email: email,
-                        mobileNumber: mobileNumber,
-                        profilePicture: profilePicture ? await uploadProfilePicture(profilePicture) : document.getElementById('profilePicturePreview').src
-                    });
-
-                    // Update profile details in Firebase Auth
-                    await updateProfile(user, {
-                        displayName: `${firstName} ${lastName}`,
-                        photoURL: document.getElementById('profilePicturePreview').src
+                        phone: mobileNumber,
+                        image: profilePicture ? await uploadProfilePicture(profilePicture) : document.getElementById('profilePicturePreview').src
                     });
 
                     // Success message after update

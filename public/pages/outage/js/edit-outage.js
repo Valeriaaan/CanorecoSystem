@@ -1,36 +1,82 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore, storage } from '../../../resources/js/config.js';  
-import { collection, setDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, doc, getDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 let map;
 let selectedLocations = new Set(); 
+let outageId; // Store the ID of the outage being edited
 
 // -------------------------------------------------- Main function to initialize 
 
 async function init() {
     try {
+        // Get the outageId from the query parameter or another source
+        const params = new URLSearchParams(window.location.search);
+        outageId = params.get('id');
+
+        if (!outageId) {
+            throw new Error('No outage ID provided.');
+        }
+
+        // Fetch the existing outage data and populate the form
+        await populateOutageData(outageId);
+
         // Fetch and process the barangays data
         const barangaysData = await fetchBarangaysData();
         
         // Initialize autocomplete feature
         autocomplete(document.getElementById('municipality'), barangaysData);
         
-        // Initialize the map
         await initMap();        
 
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('map').classList.remove('d-none');
-        document.getElementById('addOutageForm').classList.remove('d-none');
+        document.getElementById('editOutageForm').classList.remove('d-none');
     } catch (error) {
         console.error('Error initializing the application:', error);
     }
 }
 
-// -------------------------------------------------- Add Outage
+// -------------------------------------------------- Populate Outage Data
 
-document.getElementById('addOutageForm').addEventListener('submit', async function(event) {
+async function populateOutageData(outageId) {
+    try {
+        const outageDocRef = doc(firestore, 'outages', outageId);
+        const outageDoc = await getDoc(outageDocRef);
+
+        if (!outageDoc.exists()) {
+            throw new Error('Outage not found.');
+        }
+
+        const outageData = outageDoc.data();
+        document.getElementById('title').value = outageData.title;
+        document.getElementById('date').value = outageData.date;
+        document.getElementById('start-time').value = outageData.startTime;
+        document.getElementById('end-time').value = outageData.endTime;
+        document.getElementById('gawain').value = outageData.gawain;
+        document.getElementById('description').value = outageData.content;
+
+        // Populate selected locations
+        outageData.selectedLocations.forEach(locationId => {
+            const locationItem = document.createElement('li');
+            locationItem.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-center');
+            locationItem.textContent = locationId;  // Modify this based on how the location is stored
+            locationItem.setAttribute('data-id', locationId);
+            document.getElementById('selectedLocations').appendChild(locationItem);
+            selectedLocations.add(locationId);
+        });
+
+    } catch (error) {
+        console.error('Error fetching outage data:', error);
+        Swal.fire('Error', `An error occurred while fetching the outage: ${error.message}`, 'error');
+    }
+}
+
+// -------------------------------------------------- Edit Outage
+
+document.getElementById('editOutageForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
     const form = event.target;
@@ -67,10 +113,10 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
 
     Swal.fire({
         title: 'Are you sure?',
-        text: "Do you want to save this outage?",
+        text: "Do you want to update this outage?",
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Save',
+        confirmButtonText: 'Update',
         cancelButtonText: 'Cancel',
         confirmButtonColor: "#4e73df",
         cancelButtonColor: "#6c757d",
@@ -80,8 +126,8 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
         if (result.isConfirmed) {
             
             Swal.fire({
-                title: 'Saving...',
-                text: 'Please wait while the outage is being saved.',
+                title: 'Updating...',
+                text: 'Please wait while the outage is being updated.',
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
@@ -93,88 +139,51 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                     throw new Error('Firestore instance is not initialized correctly.');
                 }
 
-                const outageCollectionRef = collection(firestore, 'outages');
-                const newsCollectionRef = collection(firestore, 'news');
-                const timestamp = Math.floor(new Date().getTime() / 1000.0).toString();
+                const outageDocRef = doc(firestore, 'outages', outageId);
+                const newsDocRef = doc(firestore, 'news', outageId);
 
                 const imageUrls = [];
                 for (const file of images) {
+                    const timestamp = Math.floor(new Date().getTime() / 1000.0).toString();
                     const storageRef = ref(storage, `newsImages/${timestamp}_${file.name}`);
                     const snapshot = await uploadBytes(storageRef, file);
                     const downloadURL = await getDownloadURL(snapshot.ref);
                     imageUrls.push(downloadURL);
                 }
 
-                await setDoc(doc(outageCollectionRef, timestamp), {
+                // Update outage document
+                await updateDoc(outageDocRef, {
                     title: title,
                     date: date,
                     startTime: startTime,
                     endTime: endTime,
                     gawain: gawain,
                     content: description,
-                    category: "Patalastas ng Power Interruption",
                     selectedLocations: selectedLocationsArray,
-                    timestamp: timestamp,
-                    image: imageUrls, 
-                    status: ""
+                    image: imageUrls.length > 0 ? imageUrls : undefined
                 });
 
-                await setDoc(doc(newsCollectionRef, timestamp), {
+                // Update news document
+                await updateDoc(newsDocRef, {
                     title: title,
                     date: date,
                     startTime: startTime,
                     endTime: endTime,
                     gawain: gawain,
                     content: description,
-                    category: "Patalastas ng Power Interruption",
                     selectedLocations: selectedLocationsArray,
-                    timestamp: timestamp,
-                    image: imageUrls, 
-                    status: ""
+                    image: imageUrls.length > 0 ? imageUrls : undefined
                 });
 
-                // Fetch user data from 'users' collection
-                const usersCollectionRef = collection(firestore, 'users');
-                const querySnapshot = await getDocs(usersCollectionRef);
-                const usersData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-                const selectedLocationsName = Array.from(document.getElementById('selectedLocations').children).map(li => 
-                    li.getAttribute('data-municipality-id')
-                );
-
-                // Add notifications only for users whose barangay and municipality match the selected locations
-                for (const user of usersData) {
-                    const userBarangay = user.barangay || 'Not specified';
-                    const userMunicipality = user.municipality || 'Not specified';
-                    const userKey = `${userMunicipality}, ${userBarangay}`;
-
-                    if (selectedLocationsName.includes(userKey)) {
-                        console.log(`User's Barangay: ${userBarangay}, Municipality: ${userMunicipality} matches with selected locations.`);
-
-                        const userNotificationsRef = collection(firestore, `users/${user.id}/notifications`);
-                        await setDoc(doc(userNotificationsRef, timestamp), {
-                            title: "Patalastas ng Power Interruption",
-                            text: `${title}`,
-                            status: false,
-                            isRead: false,
-                            timestamp: timestamp
-                        });
-                        console.log(`Notification sent to user: ${user.id}`);
-
-                    } else {
-                        console.log(`User's Barangay: ${userBarangay}, Municipality: ${userMunicipality} does not match any selected location.`);
-                    }
-                }
-
-                // Close the loading Swal and show success message
-                Swal.fire('Saved!', 'The outage has been saved successfully.', 'success').then(() => {
+                Swal.fire('Updated!', 'The outage has been updated successfully.', 'success').then(() => {
                     form.reset();
                     form.classList.remove('was-validated');
                     window.location.href = 'outage.html';
                 });
 
             } catch (error) {
-                console.error('Error saving document:', error.message || error);
-                Swal.fire('Error', `An error occurred while saving the outage: ${error.message}`, 'error');
+                console.error('Error updating document:', error.message || error);
+                Swal.fire('Error', `An error occurred while updating the outage: ${error.message}`, 'error');
             }
         }
     });

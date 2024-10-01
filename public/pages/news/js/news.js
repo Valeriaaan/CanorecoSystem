@@ -48,7 +48,7 @@ async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
                 // Only add if the news ID is not already processed
                 if (!loadedNewsIds.has(newsData.id)) {
                     newsArray.push(newsData);
-                    loadedNewsIds.add(newsData.id); // Track the ID to prevent duplication
+                    loadedNewsIds.add(newsData.id); 
                 }
             }
         });
@@ -61,6 +61,7 @@ async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
         newsCountElement.textContent = `${displayStart}-${displayEnd} of ${newsArray.length}`;
 
         if (paginatedNews.length === 0) {
+            document.getElementById('loadingSpinner').classList.add('d-none');
             emptyState.style.display = 'block';
         } else {
             emptyState.style.display = 'none';
@@ -70,7 +71,6 @@ async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
         }
 
         updatePaginationControls(newsArray.length, page);
-
 
     } catch (error) {
         console.error("Error fetching news: ", error);
@@ -113,7 +113,7 @@ function renderNewsCard(news, container) {
         event.preventDefault();
         if (news.category === "Patalastas ng Power Interruption") {
             // Redirect to edit-outage.html if the category is for power interruption
-            window.location.href = `edit-outage.html?id=${docId}`;
+            window.location.href = `../outage/edit-outage.html?id=${docId}`;
         } else {
             // Otherwise, redirect to edit-news.html
             window.location.href = `edit-news.html?id=${docId}`;
@@ -133,7 +133,6 @@ function renderNewsCard(news, container) {
     container.appendChild(newsCard);
     deleteNews(newsCard, docId);
 
-    // Hide the loading spinner and show the news container
     document.getElementById('loadingSpinner').classList.add('d-none');
 }
 

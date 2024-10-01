@@ -1,33 +1,50 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore, auth } from '../../../resources/js/config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import { collection, getDocs, query, where, doc, deleteDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 // -------------------------------------------------- Fetch and display data
 
 async function fetchData() {
     const usersCollection = collection(firestore, 'users');
-    const membersQuery = query(usersCollection, where('userType', '==', 'linemen'));
+    let membersQuery = query(usersCollection, where('userType', '==', 'linemen'));
 
     try {
-        const querySnapshot = await getDocs(membersQuery);
-        const data = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                console.log("No user Logged in");
+                return;
+            }
+            console.log('Logged in user UID:', user.uid);
+            
+            const userRef = doc(firestore, 'users', user.uid);
+            const userDoc = await getDoc(userRef);
+            const { userType, area } = userDoc.data(); 
+            
+            console.log('User Type:', userType);
+            console.log('User Area:', area);
 
-        console.log('Fetched data:', data);
+            if (userType === 'admin') {
+                membersQuery = query(usersCollection, where('userType', '==', 'linemen'), where('area', '==', area));
+            } 
 
-        // Populate DataTable
-        populateTable(data);
+            const querySnapshot = await getDocs(membersQuery);
+            const data = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
 
-        
-        document.getElementById('employeeTable').classList.remove('d-none');
-        document.getElementById('loadingSpinner').classList.add('d-none');
+            populateTable(data);
+
+            document.getElementById('employeeTable').classList.remove('d-none');
+            document.getElementById('loadingSpinner').classList.add('d-none');
+        });
     } catch (error) {
         console.error("Error fetching documents: ", error);
     }
 }
+
 
 // -------------------------------------------------- Function to populate the DataTable
 

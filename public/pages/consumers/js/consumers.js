@@ -16,12 +16,8 @@ async function fetchData() {
             ...doc.data()
         }));
 
-        console.log('Fetched data:', data);
-
-        // Populate DataTable
         populateTable(data);
 
-        
         document.getElementById('consumersTable').classList.remove('d-none');
         document.getElementById('loadingSpinner').classList.add('d-none');
     } catch (error) {
@@ -49,12 +45,26 @@ function populateTable(data) {
                 title: 'Name',
                 className: 'text-start',
                 render: function (data, type, row) {
-                    const firstName = row.firstName || 'N/A';
-                    const lastName = row.lastName || 'N/A';
+                    const firstName = row.firstName || '';
+                    const lastName = row.lastName || '';
                     return `${firstName} ${lastName}`;
                 }
             },
             { data: 'email', title: 'Email', className: 'text-start' },
+            {
+                data: null,
+                title: 'Address',
+                className: 'text-start',
+                render: function (data, type, row) {
+                    const municipality = row.municipality || '';
+                    const barangay = row.barangay || '';
+                    const street = row.street || '';  
+
+                    return street 
+                        ? `${municipality}, ${barangay}, ${street}`
+                        : `${municipality}, ${barangay}`;
+                }
+            },
             { data: 'phone', title: 'Contact Number', className: 'text-start'  },
             {
                 data: 'access',
@@ -96,7 +106,7 @@ function populateTable(data) {
     });
 
     // Event listener for Access cell click
-    $('#consumersTable tbody').on('click', 'td:nth-child(6)', function () {
+    $('#consumersTable tbody').on('click', 'td:nth-child(4)', function () {
         const table = $('#consumersTable').DataTable();
         const rowData = table.row(this).data();
         handleAccessChange(rowData.id, rowData.access);
@@ -131,7 +141,6 @@ async function handleAccessChange(id, currentAccess) {
         });
 
         try {
-            // Update the user's access status in Firestore
             const userRef = doc(firestore, 'users', id);
             await updateDoc(userRef, { access: !currentAccess });
 
@@ -140,8 +149,6 @@ async function handleAccessChange(id, currentAccess) {
                 icon: 'success',
                 text: `The user's account has been ${confirmText}d successfully.`
             });
-
-            // Refresh the table data
             fetchData();
 
         } catch (error) {

@@ -129,19 +129,28 @@ function addLocationToCard(location, id) {
     col.setAttribute('data-lng', location.longitude);
     col.setAttribute('data-id', id);
 
+    // Building the address part conditionally
+    let address = `${location.municipality}, ${location.barangay}`;
+    if (location.street) {
+        address += `, ${location.street}`;
+    }
+    if (location.unit) {
+        address += `, ${location.unit}`;
+    }
+
     col.innerHTML = `
         <div class="card-body" role="button">
             <div class="p-2">
                 <h5 class="card-title fw-bold">${location.locationName}</h5>
                 <p class="text-muted mb-0 mt-2"><i class="fas fa-globe fa-sm me-2"></i>${location.latitude}, ${location.longitude}</p>
-                <p class="text-muted mb-0 mt-2"><i class="fas fa-location-dot fa-sm me-2"></i>${location.municipality}, ${location.barangay}, ${location.street}, ${location.unit}</p>
+                <p class="text-muted mb-0 mt-2"><i class="fas fa-location-dot fa-sm me-2"></i>${address}</p>
             <div class="d-flex gap-2 p-2">
                 <a href="edit-bayad-center.html?id=${id}" class="btn btn-sm btn-outline-primary w-50">Edit</a>
                 <button type="button" class="btn btn-sm btn-outline-danger w-50" onclick="confirmDeleteLocation('${id}', '${location.locationName}')">Delete</button>
             </div>
         </div>
     `;
-    
+
     locationsContainer.appendChild(col);
 
     col.addEventListener('click', () => {
@@ -156,6 +165,7 @@ function addLocationToCard(location, id) {
         }
     });
 }
+
 
 // -------------------------------------------------- Delete Location 
 

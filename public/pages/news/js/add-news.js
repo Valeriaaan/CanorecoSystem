@@ -77,7 +77,7 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
                 // Get all users from the 'users' collection
                 const usersCollectionRef = collection(firestore, 'users');
                 const querySnapshot = await getDocs(usersCollectionRef);
-
+                
                 // Add notifications for all users
                 querySnapshot.forEach(async (userDoc) => {
                     const userId = userDoc.id;
@@ -86,6 +86,8 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
                     await setDoc(doc(userNotificationsRef, timestamp), {
                         title: `${newsCategory}`,
                         text: `${newsTitle}`,
+                        status: false,
+                        isRead: false,
                         timestamp: timestamp
                     });
                 });

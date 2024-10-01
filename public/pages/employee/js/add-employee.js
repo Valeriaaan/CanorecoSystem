@@ -28,7 +28,7 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async func
     const profilePicture = document.getElementById('profilePicture').files[0];
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const roles = 'employee';
+    const userType = document.getElementById('userType').value;
     const area = document.getElementById('area').value;
 
     try {
@@ -51,14 +51,13 @@ document.getElementById('addEmployeeForm').addEventListener('submit', async func
             firstName: firstName,
             lastName: lastName,
             address: address,
-            birthdate: birthdate,
-            contactNumber: contactNumber,
-            profilePicture: profilePictureUrl,
-            roles: roles,
+            dateOfBirth: birthdate,
+            phone: contactNumber,
+            image: profilePictureUrl,
+            userType: userType,
             area: area,
-            access: 'Deactivated',
-            timestamp: Math.floor(new Date().getTime()/1000.0),
-            password: password
+            access: 'Activated',
+            timestamp: Math.floor(new Date().getTime()/1000.0)
         });
 
         Swal.fire({

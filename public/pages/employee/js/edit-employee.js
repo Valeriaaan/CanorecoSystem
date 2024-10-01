@@ -1,7 +1,8 @@
 // -------------------------------------------------- Firebase Imports
 
-import { firestore } from '../../../resources/js/config.js';
+import { firestore, storage } from '../../../resources/js/config.js';
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 // -------------------------------------------------- Helper Functions
 
@@ -24,10 +25,15 @@ async function loadEmployeeData(employeeID) {
 
         if (docSnap.exists()) {
             const employeeData = docSnap.data();
+
+            const [month, day, year] = employeeData.dateOfBirth.split('-');
+
             document.getElementById('firstName').value = employeeData.firstName || "";
             document.getElementById('lastName').value = employeeData.lastName || "";
             document.getElementById('contactNumber').value = employeeData.phone || "";
-            document.getElementById('birthdate').value = employeeData.dateOfBirth || "";
+            document.getElementById('municipality').value = employeeData.municipality || "";
+            document.getElementById('barangay').value = employeeData.barangay || "";
+            document.getElementById('birthdate').value = `${year}-${month}-${day}` || "";
             document.getElementById('profilePicturePreview').src = employeeData.image || "";
             document.getElementById('profilePicturePreview').style.display = employeeData.image ? 'block' : 'none';
             document.getElementById('area').value = employeeData.area || "";
@@ -63,7 +69,7 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
     const municipality = document.getElementById('municipality').value;
     const barangay = document.getElementById('barangay').value;
     const contactNumber = document.getElementById('contactNumber').value;
-    const birthdate = document.getElementById('birthdate').value;
+    const birthdate = document.getElementById('birthdate').value.split('-');
     const profilePicture = document.getElementById('profilePicture').files[0];
     const area = document.getElementById('area').value;
 
@@ -93,10 +99,11 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
 
         try {
             const docRef = doc(firestore, 'users', employeeID);
+            const employeeSnapshot = await getDoc(docRef);
+            let profilePictureUrl = employeeSnapshot.data().image || '';
 
-            let profilePictureUrl = '';
             if (profilePicture) {
-                const storageReference = storageRef(storage, `profile_pictures/${employeeID}/updated`);
+                const storageReference = ref(storage, `profile_pictures/${employeeID}/updated`);
                 await uploadBytes(storageReference, profilePicture);
                 profilePictureUrl = await getDownloadURL(storageReference);
             }
@@ -107,7 +114,7 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
                 municipality: municipality,
                 barangay: barangay,
                 phone: contactNumber,
-                birthdate: birthdate,
+                dateOfBirth: `${birthdate[1].padStart(2, '0')}-${birthdate[2].padStart(2, '0')}-${birthdate[0]}`,
                 image: profilePictureUrl,
                 area: area
             });

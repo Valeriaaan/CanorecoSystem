@@ -7,7 +7,7 @@ import { formatDate, formatTime } from '../../../resources/js/main.js';
 let currentPage = 1;
 let totalPages = 1;
 const complaintsPerPage = 5;
-const loadedComplaintIds = new Set(); // Track loaded complaint IDs to prevent duplicates
+const loadedComplaintIds = new Set(); 
 
 loadComplaintCards();
 setupCategoryFilters();
@@ -16,14 +16,11 @@ setupSearchBar();
 
 // -------------------------------------------------- Fetch Complaints
 
-// -------------------------------------------------- Fetch Complaints
-
 async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = '') {
     const complaintsContainer = document.getElementById("complaintsContainer");
     const emptyState = document.getElementById("emptyState");
     const complaintsCountElement = document.querySelector(".complaints-count");
 
-    // Clear the complaints container and reset the Set of loaded IDs
     complaintsContainer.innerHTML = '';
     loadedComplaintIds.clear();
 
@@ -71,6 +68,7 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
         complaintsCountElement.textContent = `${displayStart}-${displayEnd} of ${totalComplaints}`;
 
         if (paginatedComplaints.length === 0) {
+            document.getElementById('loadingSpinner').classList.add('d-none');
             emptyState.style.display = 'block';
         } else {
             emptyState.style.display = 'none';
@@ -86,7 +84,6 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
         Swal.fire('Error!', 'There was an error fetching the complaints.', 'error');
     }
 }
-
 
 function renderComplaintCard(complaint, container) {
     const docId = complaint.id;
@@ -130,7 +127,6 @@ function renderComplaintCard(complaint, container) {
     container.appendChild(complaintCard);
     deleteComplaint(complaintCard, docId);
 
-    // Hide the loading spinner and show the complaints container
     document.getElementById('loadingSpinner').classList.add('d-none');
 }
 

@@ -46,26 +46,15 @@
                                 <li class="nav-item dropdown me-1">
                                     <a class="nav-link top-nav" href="#" id="navbarNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-bell"></i>
+                                        <span class="border border-light p-2 rounded-circle bg-danger" id="notificationBadge" style="position: absolute; top: 7px; right: 4.5px; display: none;"></span>
                                         <span class="d-inline d-lg-none ms-1 fw-medium">Notifications</span>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarNotifications">
-                                        <li><a class="dropdown-item" href="#">Notification 1</a></li>
-                                        <li><a class="dropdown-item" href="#">Notification 2</a></li>
-                                        <li><a class="dropdown-item" href="#">Notification 3</a></li>
+                                    <ul id="notificationDropdown" class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarNotifications">
+                                        <li><p class="dropdown-item text-muted mb-0">No new notifications</p></li>
                                     </ul>
                                 </li>
                                 
-                                <li class="nav-item dropdown me-1">
-                                    <a class="nav-link top-nav" href="#" id="navbarMessages" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-envelope"></i>
-                                        <span class="d-inline d-lg-none ms-1 fw-medium">Messages</span>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarMessages">
-                                        <li><a class="dropdown-item" href="#">Message 1</a></li>
-                                        <li><a class="dropdown-item" href="#">Message 2</a></li>
-                                        <li><a class="dropdown-item" href="#">Message 3</a></li>
-                                    </ul>
-                                </li>
+                                
 
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle top-nav" href="#" id="navbarProfile" role="button"
@@ -92,7 +81,7 @@
 
                             <div class="d-flex justify-content-between align-items-center">
                                 <h4 class="fw-bold">Add Employee</h4>
-                                <a href="employee.html" class="btn btn-secondary" role="button">
+                                <a href="javascript:void(0);" onclick="window.history.back();" class="btn btn-secondary" role="button">
                                     <span class="d-none d-sm-inline">Back</span>
                                     <i class="fas fa-arrow-left d-inline d-sm-none"></i>
                                 </a>
@@ -114,47 +103,57 @@
                                 </ol>
                             </nav>
 
-                            <!-- Data Table Card -->
+                            <!-- Add Employee Form -->
                             <form id="addEmployeeForm" class="mt-4 needs-validation" novalidate>
                                 <div class="mb-3">
                                     <label for="firstName" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="firstName" required>
+                                    <input type="text" class="form-control" id="firstName" placeholder="Enter first name" required>
                                     <div class="invalid-feedback">Please enter the first name.</div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="lastName" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="lastName" required>
+                                    <input type="text" class="form-control" id="lastName" placeholder="Enter last name" required>
                                     <div class="invalid-feedback">Please enter the last name.</div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="address" class="form-label">Address</label>
-                                    <input type="text" class="form-control" id="address" required>
+                                    <input type="text" class="form-control" id="address" placeholder="Enter address" required>
                                     <div class="invalid-feedback">Please enter the address.</div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="contactNumber" class="form-label">Contact Number</label>
-                                    <input type="tel" class="form-control" id="contactNumber" required pattern="[0-9]{11}">
+                                    <input type="tel" class="form-control" id="contactNumber" placeholder="Enter contact number" pattern="[0-9]{11}" maxlength="11" required>
                                     <div class="invalid-feedback">Please enter a valid 11-digit contact number.</div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="birthdate" class="form-label">Birthdate</label>
-                                    <input type="date" class="form-control" id="birthdate" required>
+                                    <input type="date" class="form-control" id="birthdate" placeholder="Enter birthdate" required>
                                     <div class="invalid-feedback">Please select a birthdate.</div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="area" class="form-label">Area</label>
+                                    <label for="userType" class="form-label">User Type</label>
+                                    <select class="form-select" id="userType" required>
+                                        <option value="" selected disabled>Select User Type</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="linemen">Lineman</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select an area.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="area" class="form-label">Area Designation</label>
                                     <select class="form-select" id="area" required>
-                                        <option value="" selected disabled>Select an area</option>
+                                        <option value="" selected disabled>Select an area designation</option>
                                         <option value="Area 1">Area 1</option>
                                         <option value="Area 2">Area 2</option>
                                         <option value="Area 3">Area 3</option>
                                     </select>
-                                    <div class="invalid-feedback">Please select an area.</div>
+                                    <div class="invalid-feedback">Please select an area designation.</div>
                                 </div>
 
                                 <div class="mb-3">
@@ -166,14 +165,14 @@
 
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" required>
+                                    <input type="email" class="form-control" id="email" placeholder="Enter email address" required>
                                     <div class="invalid-feedback">Please enter a valid email address.</div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" class="form-control" id="password" required minlength="6">
-                                    <div class="invalid-feedback">Please enter a password with at least 6 characters.</div>
+                                    <input type="password" class="form-control" id="password" placeholder="Enter user password" required minlength="8">
+                                    <div class="invalid-feedback">Please enter a password with at least 8 characters.</div>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary">Add Employee</button>
