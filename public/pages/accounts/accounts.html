@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.3/css/responsive.bootstrap5.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.3/css/responsive.dataTables.css">
     <link rel="stylesheet" href="../../resources/css/style.css">
-    <title>Edit Employee &#8211; CANORECO</title>
+    <title>Accounts &#8211; CANORECO</title>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -83,11 +83,18 @@
                         <div class="col p-4">
 
                             <div class="d-flex justify-content-between align-items-center">
-                                <h4 class="fw-bold">Edit Employee</h4>
-                                <a href="javascript:void(0);" onclick="window.history.back();" class="btn btn-secondary" role="button">
-                                    <span class="d-none d-sm-inline">Back</span>
-                                    <i class="fas fa-arrow-left d-inline d-sm-none"></i>
-                                </a>
+                                <h4 class="fw-bold">Accounts</h4>
+                                <div>
+                                    <a href="view-request.html" class="btn btn-success" role="button">
+                                        <span class="d-none d-sm-inline">Link Requests</span>
+                                        <i class="fas fa-plus d-inline d-sm-none"></i>
+                                    </a>
+                                    <a href="add-accounts.html" class="btn btn-main" role="button">
+                                        <span class="d-none d-sm-inline">Add Account</span>
+                                        <i class="fas fa-plus d-inline d-sm-none"></i>
+                                    </a>
+                                </div>
+                                
                             </div>
                             
                             <nav aria-label="breadcrumb">
@@ -97,97 +104,40 @@
                                             <i class="fas fa-house fa-sm"></i><span class="visually-hidden">Home</span>
                                         </a>
                                     </li>
-                                    <li class="breadcrumb-item">
-                                        <a class="link-body-emphasis fw-semibold text-decoration-none" href="employee.html">Employee</a>
-                                    </li>
                                     <li class="breadcrumb-item active" aria-current="page">
-                                        Edit Employee
+                                        Accounts
                                     </li>
                                 </ol>
                             </nav>
 
                             <!-- Data Table Card -->
-                            <div class="card shadow-sm p-2">
+                            <div class="card mt-3">
                                 <div class="card-body">
-                                    <div class="col-lg-8 col-md-8 mx-auto">
- 
-                                        <form id="editEmployeeForm" class="my-3 needs-validation d-none" novalidate>
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label for="firstName" class="form-label">First Name</label>
-                                                    <input type="text" class="form-control" id="firstName" required>
-                                                    <div class="invalid-feedback">Please enter the first name.</div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="lastName" class="form-label">Last Name</label>
-                                                    <input type="text" class="form-control" id="lastName" required>
-                                                    <div class="invalid-feedback">Please enter the last name.</div>
-                                                </div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="birthdate" class="form-label">Birthdate</label>
-                                                <input type="date" class="form-control" id="birthdate" required>
-                                                <div class="invalid-feedback">Please select a birthdate.</div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="contactNumber" class="form-label">Contact Number</label>
-                                                <input type="tel" class="form-control" id="contactNumber" placeholder="Enter contact number" pattern="[0-9]{11}" maxlength="11" minlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" required>
-                                                <div class="invalid-feedback">Please enter a valid 11-digit contact number.</div>
-                                            </div>
-
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label for="municipality" class="form-label">Municipality</label>
-                                                    <select id="municipality" class="form-select" required>
-                                                        <option value="" disabled selected>Select municipality</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Please select the municipality.</div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="barangay" class="form-label">Barangay</label>
-                                                    <select id="barangay" class="form-select" required>
-                                                        <option value="" disabled selected>Select barangay</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Please select the barangay.</div>
-                                                </div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="userType" class="form-label">User Role</label>
-                                                <select class="form-select" id="userType" required>
-                                                    <option value="" selected disabled>Select User Type</option>
-                                                    <option value="admin">Admin</option>
-                                                    <option value="linemen">Lineman</option>
-                                                </select>
-                                                <div class="invalid-feedback">Please select an area.</div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="area" class="form-label">Area Designation</label>
-                                                <select class="form-select" id="area" required>
-                                                    <option value="" selected disabled>Select an area</option>
-                                                    <option value="Area 1">Area 1</option>
-                                                    <option value="Area 2">Area 2</option>
-                                                    <option value="Area 3">Area 3</option>
-                                                </select>
-                                                <div class="invalid-feedback">Please select an area.</div>
-                                            </div>
-
-                                            <button type="submit" class="btn btn-primary">Edit Employee</button>
-                                        </form>
-
-                                        <!-- Loading Spinner -->
-                                        <div id="loadingSpinner" class="d-flex justify-content-center align-items-center">
-                                            <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden">Loading...</span>
-                                            </div>
+                                    <table id="accountsTable" class="responsive w-100 d-none">
+                                        <thead>
+                                            <tr></tr>
+                                                <th data-priority="1">Acct #</th>
+                                                <th>Acct Name</th>
+                                                <th>Address</th>
+                                                <th>Consumer Acct</th>
+                                                <th>Status</th>
+                                                <th data-priority="2">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data will be inserted here dynamically -->
+                                        </tbody>
+                                    </table>
+                                      
+                                    <!-- Loading Spinner -->
+                                    <div id="loadingSpinner" class="d-flex justify-content-center align-items-center m-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -203,7 +153,7 @@
     <!-- Scripts -->
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
-    <script src="../employee/js/edit-employee.js" type="module"></script>
+    <script src="../accounts/js/accounts.js" type="module"></script>
 
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

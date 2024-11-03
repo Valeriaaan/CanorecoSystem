@@ -136,14 +136,14 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="mobile" class="form-label">Contact Number</label>
-                                        <input type="tel" class="form-control" id="mobile" placeholder="Enter your number" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" maxlength="13" required>
+                                        <input type="tel" class="form-control" id="mobile" placeholder="Enter your number" pattern="[0-9]{11}" maxlength="11" minlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" required>
                                         <div class="invalid-feedback">
                                             Please provide a contact number (Must be 11 digits long).
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="additionalMobile" class="form-label">Additional Contact Number <span class="text-muted">(Optional)</span></label>
-                                        <input type="tel" class="form-control" id="additionalMobile" placeholder="Enter your number" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" maxlength="13">
+                                        <input type="tel" class="form-control" id="additionalMobile" placeholder="Enter your number" pattern="[0-9]{11}" maxlength="11" minlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" >
                                         <div class="invalid-feedback">
                                             Contact number must be 11 digits long.
                                         </div>

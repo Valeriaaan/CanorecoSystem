@@ -1,7 +1,8 @@
 // -------------------------------------------------- Firebase Imports
 
-import { auth } from './config.js';
+import { auth, firestore } from './config.js';
 import { signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 // -------------------------------------------------- Auth State Change 
 
@@ -25,13 +26,37 @@ async function loginUser(event) {
 
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            Swal.fire({
-                icon: 'success',
-                title: 'Login Successful',
-                text: 'Welcome back!',
-            }).then(() => {
-                window.location.href = '../pages/dashboard/dashboard.html';
-            });
+            const userId = userCredential.user.uid;
+
+            const userDoc = await getDoc(doc(firestore, "users", userId));
+
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                
+                if (userData.access === true) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Successful',
+                        text: 'Welcome back!',
+                    }).then(() => {
+                        window.location.href = '../pages/dashboard/dashboard.html';
+                    });
+                } else {
+                    await auth.signOut(); 
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Account Under Validation',
+                        text: 'Your account is under validation. Please wait for approval.',
+                    });
+                }
+            } else {
+                await auth.signOut(); 
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Failed',
+                    text: "No user data found.",
+                });
+            }
         } catch (error) {
             Swal.fire({
                 icon: 'error',
@@ -121,5 +146,4 @@ async function includeHTML() {
     }
 }
 
-// Call the function on page load
 window.addEventListener('DOMContentLoaded', includeHTML);

@@ -42,16 +42,6 @@ function initMap() {
     document.getElementById('map').classList.remove('d-none');
 }
 
-// -------------------------------------------------- Format Mobile Number Inputs
-
-document.getElementById('mobile').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
-
-document.getElementById('additionalMobile').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
-
 // -------------------------------------------------- Form Submission Handling
 
 document.getElementById('addBusinessCenterForm').addEventListener('submit', async function(event) {

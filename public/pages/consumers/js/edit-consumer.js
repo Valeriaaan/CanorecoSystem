@@ -58,54 +58,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// -------------------------------------------------- Load Employee Data
+// -------------------------------------------------- Load Consumer Data
 
-const employeeID = getQueryParam('id');
-if (employeeID) {
-    loadEmployeeData(employeeID);
+const consumerID = getQueryParam('id');
+if (consumerID) {
+    loadConsumerData(consumerID);
 }
 
-async function loadEmployeeData(employeeID) {
+async function loadConsumerData(consumerID) {
     try {
-        const docRef = doc(firestore, 'users', employeeID);
+        const docRef = doc(firestore, 'users', consumerID);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            const employeeData = docSnap.data();
+            const consumerData = docSnap.data();
 
-            const [month, day, year] = employeeData.dateOfBirth.split('-');
+            const [month, day, year] = consumerData.dateOfBirth.split('-');
 
-            document.getElementById('firstName').value = employeeData.firstName || "";
-            document.getElementById('lastName').value = employeeData.lastName || "";
-            document.getElementById('contactNumber').value = employeeData.phone || "";
-            document.getElementById('municipality').value = employeeData.municipality || "";
+            document.getElementById('firstName').value = consumerData.firstName || "";
+            document.getElementById('lastName').value = consumerData.lastName || "";
+            document.getElementById('contactNumber').value = consumerData.phone || "";
+            document.getElementById('municipality').value = consumerData.municipality || "";
             document.getElementById('birthdate').value = `${year}-${month}-${day}` || "";
-            document.getElementById('area').value = employeeData.area || "";
-            document.getElementById('userType').value = employeeData.userType || "";
 
-            // Trigger change event to populate barangay
             const municipalitySelect = document.getElementById('municipality');
             municipalitySelect.dispatchEvent(new Event('change'));
 
-            // Set the barangay after the event
-            document.getElementById('barangay').value = employeeData.barangay || "";
+            document.getElementById('barangay').value = consumerData.barangay || "";
 
-            // Hide the loading spinner and show the news container
             document.getElementById('loadingSpinner').classList.add('d-none');
-            document.getElementById('editEmployeeForm').classList.remove('d-none');
+            document.getElementById('editConsumerForm').classList.remove('d-none');
         } else {
             console.error('No such document!');
-            Swal.fire('Error', 'No such news document found.', 'error');
+            Swal.fire('Error', 'No such consumer document found.', 'error');
         }
     } catch (error) {
         console.error('Error getting document:', error);
-        Swal.fire('Error', 'An error occurred while loading the news data.', 'error');
+        Swal.fire('Error', 'An error occurred while loading the consumer data.', 'error');
     }
 }
 
 // -------------------------------------------------- Form Submission Handling
 
-document.getElementById('editEmployeeForm').addEventListener('submit', async function(event) {
+document.getElementById('editConsumerForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
     const form = event.target;
@@ -121,12 +116,10 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
     const barangay = document.getElementById('barangay').value;
     const contactNumber = document.getElementById('contactNumber').value;
     const birthdate = document.getElementById('birthdate').value.split('-');
-    const area = document.getElementById('area').value;
-    const userType = document.getElementById('userType').value;
 
     const result = await Swal.fire({
         title: 'Are you sure?',
-        text: "Do you want to update this employee?",
+        text: "Do you want to update this consumer?",
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Update',
@@ -140,7 +133,7 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
         
         Swal.fire({
             title: 'Updating...',
-            text: 'Please wait while employee details is being updated.',
+            text: 'Please wait while consumer details are being updated.',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading(); 
@@ -148,8 +141,8 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
         });
 
         try {
-            const docRef = doc(firestore, 'users', employeeID);
-            const employeeSnapshot = await getDoc(docRef);
+            const docRef = doc(firestore, 'users', consumerID);
+            const consumerSnapshot = await getDoc(docRef);
 
             await updateDoc(docRef, {
                 firstName: firstName,
@@ -157,20 +150,18 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
                 municipality: municipality,
                 barangay: barangay,
                 phone: contactNumber,
-                dateOfBirth: `${birthdate[1].padStart(2, '0')}-${birthdate[2].padStart(2, '0')}-${birthdate[0]}`,
-                area: area,
-                userType: userType
+                dateOfBirth: `${birthdate[1].padStart(2, '0')}-${birthdate[2].padStart(2, '0')}-${birthdate[0]}`
             });
 
-            Swal.fire('Updated!', 'Employee details has been updated.', 'success').then(() => {
-                document.getElementById('editEmployeeForm').reset();
+            Swal.fire('Updated!', 'Consumer details have been updated.', 'success').then(() => {
+                document.getElementById('editConsumerForm').reset();
                 form.classList.remove('was-validated');
-                window.location.href = 'employee.html';
+                window.location.href = 'consumer.html';
             });
 
         } catch (error) {
             console.error('Error updating document:', error);
-            Swal.fire('Error', 'An error occurred while updating the employee.', 'error');
+            Swal.fire('Error', 'An error occurred while updating the consumer.', 'error');
         }
     }
 });

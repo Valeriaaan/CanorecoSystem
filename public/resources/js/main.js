@@ -238,13 +238,40 @@ function getTimeElapsed(epochTime) {
 // -------------------------------------------------- Logout functionality
 
 document.getElementById('logout').addEventListener('click', async () => {
-    try {
-        await signOut(auth);
-        window.location.href = '../../../index.html';
-    } catch (error) {
-        console.error('Logout failed:', error);
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to log out?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Logout',
+        cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            await signOut(auth);
+            Swal.fire({
+                icon: 'success',
+                title: 'Logged out',
+                text: 'You have been logged out successfully.',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = '../../../index.html'; 
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Logout Failed',
+                text: 'An error occurred while logging out. Please try again.',
+            });
+            console.error('Logout failed:', error);
+        }
     }
 });
+
 
 // -------------------------------------------------- Include Sidebar
 

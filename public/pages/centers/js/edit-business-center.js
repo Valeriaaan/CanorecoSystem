@@ -83,16 +83,6 @@ async function loadBusinessCenterData(id) {
     }
 }
 
-// -------------------------------------------------- Format Mobile Number Inputs
-
-document.getElementById('mobile').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
-
-document.getElementById('additionalMobile').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
-
 // -------------------------------------------------- Form Submission Handling
 
 document.getElementById('editBusinessCenterForm').addEventListener('submit', async function(event) {

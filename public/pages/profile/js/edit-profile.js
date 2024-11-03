@@ -1,10 +1,9 @@
 // -------------------------------------------------- Firebase Imports
+
 import { firestore, auth, storage } from '../../../resources/js/config.js';  
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { updateProfile, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
-import { formatMobileNumber } from '../../../resources/js/main.js'; 
-
 
 // Listen for authentication state changes
 auth.onAuthStateChanged(user => {
@@ -66,12 +65,6 @@ async function uploadProfilePicture(file) {
     const snapshot = await uploadBytes(storageRef, file);
     return await getDownloadURL(snapshot.ref);
 }
-
-// -------------------------------------------------- Format Mobile Number Inputs
-
-document.getElementById('editMobileNumber').addEventListener('input', function() {
-    formatMobileNumber(this);
-});
 
 // -------------------------------------------------- Edit Profile Form Submission
 

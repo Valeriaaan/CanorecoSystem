@@ -35,7 +35,7 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
             let q;
 
             if (categoryFilter) {
-                q = query(complaintsRef, where("category", "==", categoryFilter));
+                q = query(complaintsRef, where("reportTitle", "==", categoryFilter));
             } else {
                 q = complaintsRef;
             }
@@ -44,11 +44,11 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
 
             querySnapshot.forEach((docSnapshot) => {
                 const complaintData = { id: docSnapshot.id, userId: userId, ...docSnapshot.data() };
-                if (!searchTerm || complaintData.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+                if (!searchTerm || (complaintData.reportTitle && complaintData.reportTitle.toLowerCase().includes(searchTerm.toLowerCase()))) {
                     // Only add if the complaint ID is not already processed
                     if (!loadedComplaintIds.has(complaintData.id)) {
                         complaintsArray.push(complaintData);
-                        loadedComplaintIds.add(complaintData.id); // Track the ID to prevent duplication
+                        loadedComplaintIds.add(complaintData.id);
                     }
                 }
             });
@@ -87,8 +87,9 @@ async function loadComplaintCards(categoryFilter = '', page = 1, searchTerm = ''
 
 function renderComplaintCard(complaint, container) {
     const docId = complaint.id;
+    const userId = complaint.uid; 
     const date = formatDate(complaint.timestamp);
-    const trimmedContent = complaint.concernDescription.length > 150 ? complaint.concernDescription.substring(0, 150) + '...' : complaint.content;
+    const trimmedContent = complaint.concernDescription.length > 150 ? complaint.concernDescription.substring(0, 150) + '...' : complaint.concernDescription;
 
     const complaintCard = document.createElement("div");
     complaintCard.classList.add("complaint-card", "border-bottom", "mb-1", "p-2");
@@ -97,7 +98,7 @@ function renderComplaintCard(complaint, container) {
     complaintCard.innerHTML = `
         <div class="card-body position-relative">
             <a href="view-complaints.html?id=${docId}" class="text-decoration-none text-dark d-block">
-                <span class="badge bg-primary position-absolute top-0 start-0 m-3">${complaint.concernDescription}</span>
+                <span class="badge bg-primary position-absolute top-0 start-0 m-3">${complaint.reportTitle}</span>
                 <h5 class="card-title mt-4 pt-2">${complaint.concern}</h5>
                 <p class="card-text">${trimmedContent}</p>
             </a>
@@ -125,7 +126,7 @@ function renderComplaintCard(complaint, container) {
     });
 
     container.appendChild(complaintCard);
-    deleteComplaint(complaintCard, docId);
+    deleteComplaint(complaintCard, userId, docId);
 
     document.getElementById('loadingSpinner').classList.add('d-none');
 }
@@ -245,32 +246,34 @@ function setupSearchBar() {
         clearTimeout(searchInput.searchTimeout);
         searchInput.searchTimeout = setTimeout(() => {
             const searchTerm = searchInput.value;
-            const selectedCategory = document.querySelector("#newsMenu .nav-link.active")?.textContent.trim() || '';
-            loadNewsCards(selectedCategory, 1, searchTerm);
+            const selectedCategory = document.querySelector("#complaintsMenu .nav-link.active")?.textContent.trim() || '';
+            loadComplaintCards(selectedCategory, 1, searchTerm);
         }, 300);
     });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const categoryLinks = document.querySelectorAll("#newsMenu .nav-link");
-    const newsHeader = document.getElementById('newsHeader');
+    const categoryLinks = document.querySelectorAll("#complaintsMenu .nav-link");
+    const newsHeader = document.getElementById('complaintsHeader');
 
     categoryLinks.forEach(link => {
         link.addEventListener("click", (event) => {
             event.preventDefault();
             const selectedCategory = link.textContent.trim();
-            newsHeader.textContent = selectedCategory + " News";
+            newsHeader.textContent = selectedCategory ;
         });
     });
 });
 
 // -------------------------------------------------- Delete Complaint
 
-function deleteComplaint(cardElement, docId) {
+function deleteComplaint(cardElement, userId, docId) {
     const deleteButton = cardElement.querySelector('.delete-item');
     
     deleteButton.addEventListener('click', async (event) => {
         event.preventDefault();
+        event.stopPropagation();
+        
         const result = await Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
@@ -283,8 +286,10 @@ function deleteComplaint(cardElement, docId) {
 
         if (result.isConfirmed) {
             try {
-                await deleteDoc(doc(firestore, "consumer_complaints", docId));
-                cardElement.remove(); // Remove the card from the UI
+                await deleteDoc(doc(firestore, `users/${userId}/my_complaints`, docId));
+                
+                cardElement.remove();
+                
                 Swal.fire('Deleted!', 'The complaint has been deleted.', 'success');
             } catch (error) {
                 console.error("Error deleting complaint: ", error);
@@ -293,3 +298,4 @@ function deleteComplaint(cardElement, docId) {
         }
     });
 }
+

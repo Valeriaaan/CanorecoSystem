@@ -125,6 +125,42 @@ function listenToNews() {
     });
 }
 
+// -------------------------------------------------- Fetch and Process Damaged Devices from RTDB
+
+async function fetchDamagedDevicesFromRTDB(barangaysData) {
+    const devicesRef = ref(database, 'devices');
+    return new Promise((resolve, reject) => {
+        onValue(devicesRef, (snapshot) => {
+            let damagedDevices = [];
+
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const deviceData = childSnapshot.val();
+
+                    if (deviceData.status === "damaged") {
+                        const barangayId = `${deviceData.id}`; // Assuming 'id' is barangayID
+                        const locationName = getLocationName(barangayId, barangaysData);
+                        
+                        if (locationName) {
+                            damagedDevices.push({
+                                barangayId: barangayId,
+                                name: locationName,
+                                type: 'future', // Can treat as future outage
+                                outageId: deviceData.deviceID, // Assuming you have some device identifier
+                                outageGawain: 'Damaged Device' // Label for damaged devices
+                            });
+                        }
+                    }
+                });
+            }
+
+            resolve(damagedDevices);
+        }, (error) => {
+            reject(error);
+        });
+    });
+}
+
 // -------------------------------------------------- Fetch Barangays JSON data
 
 async function fetchBarangaysData() {
@@ -300,6 +336,7 @@ async function fetchFilteredOutages(isCurrentOutages) {
             }
         });
 
+        
         // Update the map with the highlighted selected locations
         highlightSelectedLocations();
     });
@@ -321,9 +358,7 @@ document.querySelector('.nav-link[href="#futureOutages"]').addEventListener('cli
     document.getElementById('mapLoadingOverlay').classList.add('d-none');
 });
 
-
 // -------------------------------------------------- Initialize and Fetch Data
-
 
 async function initializeDashboard() {
     try {

@@ -8,7 +8,8 @@ import { collection, getDocs, query, where, doc, deleteDoc, getDoc, updateDoc } 
 
 async function fetchData() {
     const usersCollection = collection(firestore, 'users');
-    let membersQuery = query(usersCollection, where('userType', '==', 'linemen'));
+    let membersQuery = query(usersCollection, where('userType', 'in', ['linemen', 'admin']));
+
 
     try {
         onAuthStateChanged(auth, async (user) => {
@@ -57,7 +58,12 @@ function populateTable(data) {
         responsive: true,
         columnDefs: [
             { responsivePriority: 1, targets: 0 },
-            { responsivePriority: 2, targets: -1 }
+            { responsivePriority: 2, targets: -1 },
+            {
+                "targets": '_all',
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    $(td).css('padding', '10px') }
+            }
         ],
         data: data,
         columns: [
@@ -71,8 +77,8 @@ function populateTable(data) {
                     return `${firstName} ${lastName}`;
                 }
             },
-            { data: 'email', title: 'Email', className: 'text-start' },
             { data: 'phone', title: 'Contact Number', className: 'text-start'  },
+            { data: 'userType', title: 'Role', className: 'text-start' },
             { data: 'area', title: 'Designation', className: 'text-start'  },
             {
                 data: 'access',

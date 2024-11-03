@@ -36,7 +36,12 @@ function populateTable(data) {
         responsive: true,
         columnDefs: [
             { responsivePriority: 1, targets: 0 },
-            { responsivePriority: 2, targets: -1 }
+            { responsivePriority: 2, targets: -1 },
+            {
+                "targets": '_all',
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    $(td).css('padding', '10px') }
+            }
         ],
         data: data,
         columns: [
@@ -163,7 +168,7 @@ async function handleAccessChange(id, currentAccess) {
 
 window.handleEdit = function (id) {
     console.log('Edit user:', id);
-    window.location.href = `edit-employee.html?id=${id}`;
+    window.location.href = `edit-consumers.html?id=${id}`;
 }
 
 // -------------------------------------------------- Delete function

@@ -5,9 +5,9 @@ import { collection, setDoc, doc, getDocs } from "https://www.gstatic.com/fireba
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 let map;
-let selectedLocations = new Set(); 
+let selectedLocations = new Set(); // To keep track of selected locations
 
-// -------------------------------------------------- Main function to initialize 
+// -------------------------------------------------- Main function to initialize everything
 
 async function init() {
     try {
@@ -18,7 +18,7 @@ async function init() {
         autocomplete(document.getElementById('municipality'), barangaysData);
         
         // Initialize the map
-        await initMap();        
+        await initMap();
 
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('map').classList.remove('d-none');
@@ -226,7 +226,7 @@ function autocomplete(input, data) {
             if (nameToSearch.includes(value.toLowerCase())) {
                 const itemElement = document.createElement('div');
                 itemElement.innerHTML = `<strong>${item.municipalityName}</strong>, ${item.barangayName}`;
-                itemElement.innerHTML += `<input type='hidden' data-id='${item.barangayId}' data-municipality-id='${item.fullName}' value='${item.fullName}'>`;
+                itemElement.innerHTML += `<input type='hidden' data-id='${item.barangayId}' data-municipality-id='${item.municipalityId}' value='${item.fullName}'>`;
                 itemElement.addEventListener('click', function () {
                     const selectedItem = this.getElementsByTagName('input')[0];
                     toggleSelectedLocation(selectedItem);
@@ -235,7 +235,6 @@ function autocomplete(input, data) {
                     closeAllLists();
                 });
                 listContainer.appendChild(itemElement);
-
             }
         });
     });

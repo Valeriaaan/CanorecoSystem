@@ -9,9 +9,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.3/css/responsive.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.3/css/responsive.dataTables.css">
     <link rel="stylesheet" href="../../resources/css/style.css">
-    <title>Add Employee &#8211; CANORECO</title>
+    <title>Edit Consumer &#8211; CANORECO</title>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -46,7 +49,7 @@
                                 <li class="nav-item dropdown me-1">
                                     <a class="nav-link top-nav" href="#" id="navbarNotifications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-bell"></i>
-                                        <span class="border border-light p-2 rounded-circle bg-danger" id="notificationBadge" style="position: absolute; top: 7px; right: 4.5px; display: none;"></span>
+                                        <span class="border border-light p-1 rounded-circle bg-danger" id="notificationBadge" style="position: absolute; top: 7px; right: 4.5px; display: none;"></span>
                                         <span class="d-inline d-lg-none ms-1 fw-medium">Notifications</span>
                                     </a>
                                     <ul id="notificationDropdown" class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarNotifications">
@@ -80,7 +83,7 @@
                         <div class="col p-4">
 
                             <div class="d-flex justify-content-between align-items-center">
-                                <h4 class="fw-bold">Add Employee</h4>
+                                <h4 class="fw-bold">Edit Consumer</h4>
                                 <a href="javascript:void(0);" onclick="window.history.back();" class="btn btn-secondary" role="button">
                                     <span class="d-none d-sm-inline">Back</span>
                                     <i class="fas fa-arrow-left d-inline d-sm-none"></i>
@@ -95,38 +98,36 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        <a class="link-body-emphasis fw-semibold text-decoration-none" href="employee.html">Employee</a>
+                                        <a class="link-body-emphasis fw-semibold text-decoration-none" href="consumers.html">Consumers</a>
                                     </li>
                                     <li class="breadcrumb-item active" aria-current="page">
-                                        Add Employee
+                                        Edit Consumer
                                     </li>
                                 </ol>
                             </nav>
- 
-                            <!-- Add Employee Form -->
-                             
+
+                            <!-- Data Table Card -->
                             <div class="card shadow-sm p-2">
                                 <div class="card-body">
                                     <div class="col-lg-8 col-md-8 mx-auto">
-
-                                        <form id="addEmployeeForm" class="needs-validation my-3" novalidate>
-                                            
+ 
+                                        <form id="editConsumerForm" class="my-3 needs-validation d-none" novalidate>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label for="firstName" class="form-label">First Name</label>
-                                                    <input type="text" class="form-control" id="firstName" placeholder="Enter first name" required>
+                                                    <input type="text" class="form-control" id="firstName" required>
                                                     <div class="invalid-feedback">Please enter the first name.</div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="lastName" class="form-label">Last Name</label>
-                                                    <input type="text" class="form-control" id="lastName" placeholder="Enter last name" required>
+                                                    <input type="text" class="form-control" id="lastName" required>
                                                     <div class="invalid-feedback">Please enter the last name.</div>
                                                 </div>
                                             </div>
 
                                             <div class="mb-3">
                                                 <label for="birthdate" class="form-label">Birthdate</label>
-                                                <input type="date" class="form-control" id="birthdate" placeholder="Enter birthdate" required>
+                                                <input type="date" class="form-control" id="birthdate" required>
                                                 <div class="invalid-feedback">Please select a birthdate.</div>
                                             </div>
 
@@ -153,42 +154,16 @@
                                                 </div>
                                             </div>
 
-                                            <div class="mb-3">
-                                                <label for="userType" class="form-label">User Role</label>
-                                                <select class="form-select" id="userType" required>
-                                                    <option value="" selected disabled>Select User Type</option>
-                                                    <option value="admin">Admin</option>
-                                                    <option value="linemen">Lineman</option>
-                                                </select>
-                                                <div class="invalid-feedback">Please select an area.</div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="area" class="form-label">Area Designation</label>
-                                                <select class="form-select" id="area" required>
-                                                    <option value="" selected disabled>Select an area designation</option>
-                                                    <option value="Area 1">Area 1</option>
-                                                    <option value="Area 2">Area 2</option>
-                                                    <option value="Area 3">Area 3</option>
-                                                </select>
-                                                <div class="invalid-feedback">Please select an area designation.</div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="email" class="form-label">Email</label>
-                                                <input type="email" class="form-control" id="email" placeholder="Enter email address" required>
-                                                <div class="invalid-feedback">Please enter a valid email address.</div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="password" class="form-label">Password</label>
-                                                <input type="password" class="form-control" id="password" placeholder="Enter user password" required minlength="8">
-                                                <div class="invalid-feedback">Please enter a password with at least 8 characters.</div>
-                                            </div>
-
-                                            <button type="submit" class="btn btn-primary">Add Employee</button>
+                                            <button type="submit" class="btn btn-primary">Edit Consumer</button>
                                         </form>
-                            
+
+                                        <!-- Loading Spinner -->
+                                        <div id="loadingSpinner" class="d-flex justify-content-center align-items-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -205,24 +180,29 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
-    <script src="../employee/js/add-employee.js" type="module"></script>
+    <script src="../consumers/js/edit-consumer.js" type="module"></script>
 
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.1.3/js/dataTables.bootstrap5.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.5/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.1.5/js/dataTables.bootstrap5.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.3/js/dataTables.responsive.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.3/js/responsive.dataTables.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.3/js/responsive.bootstrap5.js"></script>
 
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.dataTables.js"></script>
+    
 </body>
 
 </html>
