@@ -201,7 +201,7 @@ function populateNewsContent(title, content, timestamp, category, image, date, s
     document.querySelector('.edit-item').addEventListener('click', () => {
         if (category === "Patalastas ng Power Interruption") {
             // Redirect to edit-outage.html if the category is for power interruption
-            window.location.href = `edit-outage.html?id=${newsId}`;
+            window.location.href = `../outage/edit-outage.html?id=${newsId}`;
         } else {
             // Otherwise, redirect to edit-news.html
             window.location.href = `edit-news.html?id=${newsId}`;

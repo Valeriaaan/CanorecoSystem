@@ -20,16 +20,17 @@ async function init() {
             throw new Error('No outage ID provided.');
         }
 
-        // Fetch the existing outage data and populate the form
-        await populateOutageData(outageId);
-
         // Fetch and process the barangays data
         const barangaysData = await fetchBarangaysData();
+        // Initialize checkboxes feature
+        generateLocationCheckboxes(barangaysData);
         
-        // Initialize autocomplete feature
-        autocomplete(document.getElementById('municipality'), barangaysData);
+        // Fetch the existing outage data and populate the form
+        await populateOutageData(outageId);
         
         await initMap();        
+
+        console.log("selectedlocations:",selectedLocations);
 
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('map').classList.remove('d-none');
@@ -58,16 +59,39 @@ async function populateOutageData(outageId) {
         document.getElementById('gawain').value = outageData.gawain;
         document.getElementById('description').value = outageData.content;
 
-        // Populate selected locations
-        outageData.selectedLocations.forEach(locationId => {
-            const locationItem = document.createElement('li');
-            locationItem.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-center');
-            locationItem.textContent = locationId;  // Modify this based on how the location is stored
-            locationItem.setAttribute('data-id', locationId);
-            document.getElementById('selectedLocations').appendChild(locationItem);
-            selectedLocations.add(locationId);
-        });
+        const barangaysData = await fetchBarangaysData();
 
+        // Loop over selectedLocations and set corresponding checkboxes to checked
+        outageData.selectedLocations.forEach(barangayId => {
+            // Ensure barangayId is a string (or number as needed)
+            barangayId = String(barangayId); // Convert to string if necessary
+            console.log('Checking for Barangay ID:', barangayId);  // Log barangayId for debugging
+
+            // Find the corresponding barangay data based on barangayId
+            const locationData = barangaysData.find(item => String(item.barangayId) === barangayId);
+            console.log('Found Location Data:', locationData); // Log locationData for debugging
+
+            if (locationData) {
+                // Create the checkbox ID by combining municipalityId and barangayId
+                const checkboxId = `${locationData.municipalityId}-${locationData.barangayId}`;
+                console.log('Generated Checkbox ID:', checkboxId);  // Log generated checkbox ID
+
+                // Find the checkbox element by the generated ID
+                const checkbox = document.getElementById(checkboxId);
+                console.log('Found Checkbox:', checkbox);  // Log checkbox for debugging
+
+                if (checkbox) {
+                    checkbox.checked = true;  // Check the checkbox
+                    const event = new Event('change');
+                    checkbox.dispatchEvent(event);  // Dispatch change event to trigger any other behavior
+                    console.log('Checkbox checked for:', checkboxId);  // Log that checkbox was checked
+                } else {
+                    console.log('Checkbox not found for ID:', checkboxId);  // If checkbox is not found
+                }
+            } else {
+                console.log('No matching barangay found for ID:', barangayId);  // If locationData is not found
+            }
+        });
     } catch (error) {
         console.error('Error fetching outage data:', error);
         Swal.fire('Error', `An error occurred while fetching the outage: ${error.message}`, 'error');
@@ -89,9 +113,7 @@ document.getElementById('editOutageForm').addEventListener('submit', async funct
     const description = document.getElementById('description').value;
     const images = document.getElementById('images').files;
 
-    const selectedLocationsArray = Array.from(document.getElementById('selectedLocations').children).map(li => 
-        li.getAttribute('data-id')
-    );
+    const selectedLocationsArray = Array.from(selectedLocations).map(location => location.substring(4));
 
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
@@ -160,7 +182,7 @@ document.getElementById('editOutageForm').addEventListener('submit', async funct
                     gawain: gawain,
                     content: description,
                     selectedLocations: selectedLocationsArray,
-                    image: imageUrls.length > 0 ? imageUrls : undefined
+                    ...(imageUrls.length > 0 && { image: imageUrls }) 
                 });
 
                 // Update news document
@@ -172,7 +194,7 @@ document.getElementById('editOutageForm').addEventListener('submit', async funct
                     gawain: gawain,
                     content: description,
                     selectedLocations: selectedLocationsArray,
-                    image: imageUrls.length > 0 ? imageUrls : undefined
+                    ...(imageUrls.length > 0 && { image: imageUrls }) 
                 });
 
                 Swal.fire('Updated!', 'The outage has been updated successfully.', 'success').then(() => {
@@ -206,133 +228,171 @@ async function fetchBarangaysData() {
     }));
 }
 
-// -------------------------------------------------- Autocomplete function
+// -------------------------------------------------- Generate Location Checkboxes
 
-function autocomplete(input, data) {
-    let currentFocus;
+function generateLocationCheckboxes(data) {
+    const locationContainer = document.getElementById('locationCheckboxContainer');
+    const groupedData = {};
 
-    input.addEventListener('input', function () {
-        const value = this.value;
-        closeAllLists();
+    // Group data by municipalityId
+    data.forEach(item => {
+        const municipalityId = item.municipalityId;
+        if (!groupedData[municipalityId]) {
+            groupedData[municipalityId] = [];
+        }
+        groupedData[municipalityId].push(item);
+    });
 
-        if (!value) return false;
-        currentFocus = -1;
+    // Create an accordion container
+    const accordion = document.createElement('div');
+    accordion.className = 'accordion';
+    accordion.id = 'locationAccordion';
 
-        const listContainer = document.createElement('div');
-        listContainer.setAttribute('id', this.id + 'autocomplete-list');
-        listContainer.setAttribute('class', 'autocomplete-items');
-        this.parentNode.appendChild(listContainer);
+    // Loop through grouped data and create an accordion item for each municipality
+    for (const municipalityId in groupedData) {
+        const municipalityData = groupedData[municipalityId];
 
-        data.forEach(item => {
+        // Create the accordion header
+        const accordionHeader = document.createElement('h2');
+        accordionHeader.className = 'accordion-header';
+        accordionHeader.id = `heading${municipalityId}`;
+
+        const accordionButton = document.createElement('button');
+        accordionButton.className = 'accordion-button';
+        accordionButton.type = 'button';
+        accordionButton.dataset.bsToggle = 'collapse';
+        accordionButton.dataset.bsTarget = `#collapse${municipalityId}`;
+        accordionButton.setAttribute('aria-expanded', 'true');
+        accordionButton.setAttribute('aria-controls', `collapse${municipalityId}`);
+        accordionButton.textContent = municipalityData[0].municipalityName;
+
+        accordionHeader.appendChild(accordionButton);
+
+        // Create the accordion collapse body
+        const accordionBody = document.createElement('div');
+        accordionBody.id = `collapse${municipalityId}`;
+        accordionBody.className = 'accordion-collapse collapse';
+        accordionBody.setAttribute('aria-labelledby', `heading${municipalityId}`);
+        accordionBody.setAttribute('data-bs-parent', '#locationAccordion');
+
+        const accordionList = document.createElement('div');
+        accordionList.className = 'accordion-body';
+
+        // Create the "select all" checkbox for the municipality
+        const selectAllCheckbox = document.createElement('input');
+        selectAllCheckbox.type = 'checkbox';
+        selectAllCheckbox.className = 'form-check-input';
+        selectAllCheckbox.id = `selectAll-${municipalityId}`;
+
+        // Label for the "select all" checkbox
+        const selectAllLabel = document.createElement('label');
+        selectAllLabel.htmlFor = `selectAll-${municipalityId}`;
+        selectAllLabel.className = 'form-check-label';
+        selectAllLabel.textContent = 'Select All Barangays';
+
+        // Container for the "select all" checkbox
+        const selectAllDiv = document.createElement('div');
+        selectAllDiv.className = 'form-check';
+        selectAllDiv.appendChild(selectAllCheckbox);
+        selectAllDiv.appendChild(selectAllLabel);
+
+        // Append the "select all" checkbox to the accordion body
+        accordionList.appendChild(selectAllDiv);
+
+        // Loop through barangays and create checkboxes
+        municipalityData.forEach(item => {
             const locationId = `${item.municipalityId}-${item.barangayId}`;
-            
-            // Skip the item if it has already been selected
-            if (selectedLocations.has(locationId)) {
-                return;
-            }
 
-            const nameToSearch = `${item.municipalityName} ${item.barangayName}`.toLowerCase();
-            if (nameToSearch.includes(value.toLowerCase())) {
-                const itemElement = document.createElement('div');
-                itemElement.innerHTML = `<strong>${item.municipalityName}</strong>, ${item.barangayName}`;
-                itemElement.innerHTML += `<input type='hidden' data-id='${item.barangayId}' data-municipality-id='${item.fullName}' value='${item.fullName}'>`;
-                itemElement.addEventListener('click', function () {
-                    const selectedItem = this.getElementsByTagName('input')[0];
-                    toggleSelectedLocation(selectedItem);
-                    highlightSelectedLocations();
-                    input.value = ''; // Clear the input field after selection
-                    closeAllLists();
-                });
-                listContainer.appendChild(itemElement);
+            // Create a checkbox element
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = locationId;
+            checkbox.id = locationId;
+            checkbox.className = 'form-check-input';
 
-            }
+            // Add event listener to handle the highlighting when the checkbox is checked
+            checkbox.addEventListener('change', function () {
+                const selectedItem = {
+                    dataset: {
+                        id: item.barangayId,
+                        municipalityId: item.municipalityId
+                    },
+                    value: `${item.municipalityName}, ${item.barangayName}`,
+                    idd: item.barangayId
+                };
+                toggleSelectedLocation(selectedItem, this.checked);  // Pass the checked status
+                highlightSelectedLocations(); // Update map highlights
+                console.log(selectedLocations);
+            });
+
+            // Create a label for the checkbox
+            const label = document.createElement('label');
+            label.htmlFor = locationId;
+            label.className = 'form-check-label';
+            label.textContent = `${item.municipalityName}, ${item.barangayName}`;
+
+            // Create a container div for checkbox and label
+            const div = document.createElement('div');
+            div.className = 'form-check';
+            div.appendChild(checkbox);
+            div.appendChild(label);
+
+            // Append the checkbox div to the accordion list
+            accordionList.appendChild(div);
         });
-    });
 
-    input.addEventListener('keydown', function (e) {
-        let list = document.getElementById(this.id + 'autocomplete-list');
-        if (list) list = list.getElementsByTagName('div');
-        if (e.keyCode === 40) {
-            currentFocus++;
-            addActive(list);
-        } else if (e.keyCode === 38) {
-            currentFocus--;
-            addActive(list);
-        } else if (e.keyCode === 13) {
-            e.preventDefault();
-            if (currentFocus > -1) {
-                if (list) list[currentFocus].click();
-            }
-        }
-    });
+        // Append the list to the accordion body
+        accordionBody.appendChild(accordionList);
 
-    function addActive(list) {
-        if (!list) return false;
-        removeActive(list);
-        if (currentFocus >= list.length) currentFocus = 0;
-        if (currentFocus < 0) currentFocus = list.length - 1;
-        list[currentFocus].classList.add('autocomplete-active');
+        // Create an accordion item for the municipality
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'accordion-item';
+        accordionItem.appendChild(accordionHeader);
+        accordionItem.appendChild(accordionBody);
+
+        // Append the accordion item to the accordion container
+        accordion.appendChild(accordionItem);
+
+        // Add event listener to "select all" checkbox
+        selectAllCheckbox.addEventListener('change', function () {
+            const allCheckboxes = document.querySelectorAll(`#collapse${municipalityId} .form-check-input[type="checkbox"]:not(#selectAll-${municipalityId})`);
+            allCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+                const selectedItem = {
+                    dataset: {
+                        id: checkbox.id.split('-')[1], // Extract barangayId
+                        municipalityId: municipalityId
+                    },
+                    value: checkbox.nextElementSibling.textContent,
+                    idd: checkbox.id.split('-')[1]
+                };
+                toggleSelectedLocation(selectedItem, checkbox.checked);  // Update selected locations
+            });
+            highlightSelectedLocations(); // Update map highlights
+        });
     }
 
-    function removeActive(list) {
-        for (let i = 0; i < list.length; i++) {
-            list[i].classList.remove('autocomplete-active');
-        }
-    }
-
-    function closeAllLists(elmnt) {
-        const items = document.getElementsByClassName('autocomplete-items');
-        for (let i = 0; i < items.length; i++) {
-            if (elmnt != items[i] && elmnt != input) {
-                items[i].parentNode.removeChild(items[i]);
-            }
-        }
-    }
-
-    document.addEventListener('click', function (e) {
-        closeAllLists(e.target);
-    });
+    // Append the accordion to the location container
+    locationContainer.appendChild(accordion);
 }
+
+
 
 // -------------------------------------------------- Toggle location selection
 
-function toggleSelectedLocation(selectedItem) {
+function toggleSelectedLocation(selectedItem, isChecked) {
     const locationId = `${selectedItem.dataset.municipalityId}-${selectedItem.dataset.id}`;
-    if (selectedLocations.has(locationId)) {
-        selectedLocations.delete(locationId);
-        removeLocationFromList(locationId);
-    } else {
+    if (isChecked) {
+        // Add to selected locations if checked
         selectedLocations.add(locationId);
-        addSelectedLocation(selectedItem);
+    } else {
+        // Remove from selected locations if unchecked
+        selectedLocations.delete(locationId);
     }
 }
 
 // --------------------------------------------------  Add selected location to the list
 
-function addSelectedLocation(selectedItem) {
-    const listItem = document.createElement('li');
-    listItem.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-center');
-    listItem.textContent = selectedItem.value;
-    listItem.setAttribute('data-id', selectedItem.dataset.id);
-    listItem.setAttribute('data-municipality-id', selectedItem.dataset.municipalityId);
-    
-    // Create a remove button with Font Awesome icon
-    const removeButton = document.createElement('button');
-    removeButton.innerHTML = '<i class="fas fa-rectangle-xmark fa-xl"></i>'; 
-    removeButton.setAttribute('class', 'btn p-0 m-0 text-danger');
-    removeButton.addEventListener('click', () => {
-        removeSelectedLocation(listItem);
-    });
-    
-    // Append the remove button to the list item
-    listItem.appendChild(removeButton);
-    
-    // Append the list item to the selectedLocations container
-    document.getElementById('selectedLocations').appendChild(listItem);
-
-    // Add to selectedLocations Set
-    selectedLocations.add(`${selectedItem.dataset.municipalityId}-${selectedItem.dataset.id}`);
-}
 
 function removeSelectedLocation(listItem) {
     const id = listItem.getAttribute('data-id');

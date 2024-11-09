@@ -59,13 +59,13 @@ document.getElementById('addBusinessCenterForm').addEventListener('submit', asyn
         return;
     }
 
-    if (mobile.length !== 13) {
-        Swal.fire('Error!', 'The mobile number must be 13 characters long.', 'error');
+    if (mobile.length !== 11) {
+        Swal.fire('Error!', 'The mobile number must be 11 digits long.', 'error');
         return;
     }
 
-    if (additionalMobile && additionalMobile.length !== 13) {
-        Swal.fire('Error!', 'The additional mobile number must be 13 characters long.', 'error');
+    if (additionalMobile && additionalMobile.length !== 11) {
+        Swal.fire('Error!', 'The additional mobile number must be 11 digits long.', 'error');
         return;
     }
 

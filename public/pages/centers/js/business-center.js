@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore } from '../../../resources/js/config.js';
-import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, getDocs, doc, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const locationsCollection = collection(firestore, 'business_centers');
  
@@ -17,7 +17,7 @@ window.initMap = async () => {
         zoom: 12,
     });
 
-    const locationsSnapshot = await getDocs(locationsCollection);
+    const locationsSnapshot = await getDocs(query(locationsCollection, orderBy('locationName', 'asc')));
     locations = locationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     updateLocationsDisplay(locations);

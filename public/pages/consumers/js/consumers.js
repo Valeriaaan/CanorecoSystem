@@ -111,7 +111,7 @@ function populateTable(data) {
     });
 
     // Event listener for Access cell click
-    $('#consumersTable tbody').on('click', 'td:nth-child(4)', function () {
+    $('#consumersTable tbody').on('click', 'td:nth-child(5)', function () {
         const table = $('#consumersTable').DataTable();
         const rowData = table.row(this).data();
         handleAccessChange(rowData.id, rowData.access);

@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore } from '../../../resources/js/config.js';
-import { collection, getDocs, doc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, getDocs, doc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { formatDate, formatTime } from '../../../resources/js/main.js'; 
 
 let currentPage = 1;
@@ -21,21 +21,27 @@ async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
     const emptyState = document.getElementById("emptyState");
     const newsCountElement = document.querySelector(".news-count");
 
-    // Clear the news container and reset the Set of loaded IDs
     newsContainer.innerHTML = '';
     loadedNewsIds.clear();
 
     try {
         let q;
         if (categoryFilter) {
-            q = query(collection(firestore, "news"), where("category", "==", categoryFilter));
+            q = query(
+                collection(firestore, "news"),
+                where("category", "==", categoryFilter),
+                orderBy("timestamp", "desc") // Order by timestamp in descending order
+            );
         } else {
-            q = collection(firestore, "news");
+            q = query(
+                collection(firestore, "news"),
+                orderBy("timestamp", "desc") // Order by timestamp in descending order
+            );
         }
 
         const querySnapshot = await getDocs(q);
         const totalNews = querySnapshot.size;
-        totalPages = Math.ceil(totalNews / newsPerPage); // Update totalPages
+        totalPages = Math.ceil(totalNews / newsPerPage);
 
         const startIndex = (page - 1) * newsPerPage;
         const endIndex = startIndex + newsPerPage;
@@ -45,7 +51,6 @@ async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
         querySnapshot.forEach((docSnapshot) => {
             const newsData = { id: docSnapshot.id, ...docSnapshot.data() };
             if (!searchTerm || newsData.title.toLowerCase().includes(searchTerm.toLowerCase())) {
-                // Only add if the news ID is not already processed
                 if (!loadedNewsIds.has(newsData.id)) {
                     newsArray.push(newsData);
                     loadedNewsIds.add(newsData.id); 
@@ -55,7 +60,6 @@ async function loadNewsCards(categoryFilter = '', page = 1, searchTerm = '') {
 
         const paginatedNews = newsArray.slice(startIndex, endIndex);
 
-        // Update the news count display
         const displayStart = startIndex + 1;
         const displayEnd = Math.min(endIndex, newsArray.length);
         newsCountElement.textContent = `${displayStart}-${displayEnd} of ${newsArray.length}`;
@@ -297,17 +301,23 @@ function deleteNews(newsCard, docId) {
             try {
                 await deleteDoc(doc(firestore, "news", docId));
                 newsCard.remove();
-                Swal.fire('Deleted!', 'The news item has been deleted.', 'success');
 
-                // Check if the newsContainer is empty
-                const newsContainer = document.getElementById("newsContainer");
-                const emptyState = document.getElementById("emptyState");
-
-                if (newsContainer.children.length === 0) {
-                    emptyState.style.display = 'block';
-                }
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'The news item has been deleted.',
+                    icon: 'success',
+                }).then(() => {
+                    // Check if the newsContainer is empty
+                    const newsContainer = document.getElementById("newsContainer");
+                    const emptyState = document.getElementById("emptyState");
                 
-                location.reload();
+                    if (newsContainer.children.length === 0) {
+                        emptyState.style.display = 'block';
+                    }
+                
+                    // Reload the page after the alert is confirmed
+                    location.reload();
+                });
             } catch (error) {
                 console.error("Error deleting document: ", error);
                 Swal.fire('Error!', 'There was an error deleting the news item.', 'error');

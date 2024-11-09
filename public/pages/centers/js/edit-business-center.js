@@ -101,13 +101,13 @@ document.getElementById('editBusinessCenterForm').addEventListener('submit', asy
         return;
     }
 
-    if (mobile.length !== 13) {
-        Swal.fire('Error', 'Mobile number should be 13 digits long, including the country code.', 'error');
+    if (mobile.length !== 11) {
+        Swal.fire('Error', 'Mobile number should be 11 digits long.', 'error');
         return;
     }
 
-    if (additionalMobile && additionalMobile.length !== 13) {
-        Swal.fire('Error', 'Additional mobile number should be 13 digits long, including the country code.', 'error');
+    if (additionalMobile && additionalMobile.length !== 11) {
+        Swal.fire('Error', 'Additional mobile number should be 11 digits long.', 'error');
         return;
     }
 

@@ -12,6 +12,52 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = '../pages/dashboard/dashboard.html';
     }
 });
+// -------------------------------------------------- Fetch Barangays JSON data
+
+async function fetchBarangaysData() {
+    const response = await fetch('../../../resources/json/filtered_Barangays.json');
+    const data = await response.json();
+    return data.features.map(feature => ({
+        municipalityId: feature.properties.ID_2,
+        municipalityName: feature.properties.NAME_2,
+
+        barangayId: feature.properties.ID_3,
+        barangayName: feature.properties.NAME_3,
+        
+        fullName: `${feature.properties.NAME_2}, ${feature.properties.NAME_3}`, 
+        coordinates: feature.geometry.coordinates 
+    }));
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const municipalitySelect = document.getElementById('municipality');
+    const barangaySelect = document.getElementById('barangay');
+
+    const barangaysData = await fetchBarangaysData();
+
+    const municipalities = new Set(barangaysData.map(item => item.municipalityName));
+
+    municipalities.forEach(municipality => {
+        const option = document.createElement('option');
+        option.value = municipality;
+        option.textContent = municipality;
+        municipalitySelect.appendChild(option);
+    });
+
+    municipalitySelect.addEventListener('change', function() {
+        barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
+
+        const selectedMunicipality = municipalitySelect.value;
+        const filteredBarangays = barangaysData.filter(item => item.municipalityName === selectedMunicipality);
+
+        filteredBarangays.forEach(barangay => {
+            const option = document.createElement('option');
+            option.value = barangay.barangayName;
+            option.textContent = barangay.barangayName;
+            barangaySelect.appendChild(option);
+        });
+    });
+});
 
 // -------------------------------------------------- Register
 

@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore, storage } from '../../../resources/js/config.js';  
-import { collection, addDoc, setDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, addDoc, setDoc, doc, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
 
 // -------------------------------------------------- Add News
@@ -72,6 +72,11 @@ document.getElementById('addNewsForm').addEventListener('submit', async function
                     timestamp: timestamp,
                     image: imageUrls, 
                     status: ""
+                });
+
+                await updateDoc(doc(firestore, 'sms', 'to_all'), {
+                    content: `${newsTitle}\n\n${newsContent}\n\nPara sa iba pang impormasyon, maaaring bumisita sa CANORECO Mobile App`,
+                    send: true
                 });
 
                 // Get all users from the 'users' collection

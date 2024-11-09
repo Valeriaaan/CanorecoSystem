@@ -1,7 +1,7 @@
 // -------------------------------------------------- Firebase Imports
 
 import { firestore, database } from '../../../resources/js/config.js';
-import { collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { collection, getDocs, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { ref, get, child, onValue,  } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js"; 
 import { formatDate } from '../../../resources/js/main.js';
 
@@ -84,7 +84,8 @@ function listenToDamagedDevices() {
 
 function listenToNews() {
     const newsCollectionRef = collection(firestore, 'news');
-    const newsQuery = query(newsCollectionRef); // Add any necessary filters or ordering here
+    // Add ordering by 'timestamp' in descending order
+    const newsQuery = query(newsCollectionRef, orderBy('timestamp', 'desc')); 
     
     onSnapshot(newsQuery, (snapshot) => {
         const newsContainer = document.getElementById('newsContainer');
@@ -125,39 +126,52 @@ function listenToNews() {
     });
 }
 
+
 // -------------------------------------------------- Fetch and Process Damaged Devices from RTDB
 
-async function fetchDamagedDevicesFromRTDB(barangaysData) {
-    const devicesRef = ref(database, 'devices');
-    return new Promise((resolve, reject) => {
-        onValue(devicesRef, (snapshot) => {
-            let damagedDevices = [];
+function fetchDamagedDevicesFromRTDB() {
+    const damagedDevicesRef = ref(database, 'devices'); 
 
-            if (snapshot.exists()) {
-                snapshot.forEach((childSnapshot) => {
-                    const deviceData = childSnapshot.val();
+    onValue(damagedDevicesRef, async (snapshot) => {
+        selectedLocations.clear(); // Clear the map to avoid duplicate entries
+        await fetchFilteredOutages(true); 
 
-                    if (deviceData.status === "damaged") {
-                        const barangayId = `${deviceData.id}`; // Assuming 'id' is barangayID
-                        const locationName = getLocationName(barangayId, barangaysData);
-                        
-                        if (locationName) {
-                            damagedDevices.push({
-                                barangayId: barangayId,
-                                name: locationName,
-                                type: 'future', // Can treat as future outage
-                                outageId: deviceData.deviceID, // Assuming you have some device identifier
-                                outageGawain: 'Damaged Device' // Label for damaged devices
-                            });
-                        }
+        if (snapshot.exists()) {
+            const barangaysData = await fetchBarangaysData(); // Fetch barangay data
+            const devicesData = snapshot.val();
+
+            // Iterate over devices to find damaged ones and add them to selectedLocations
+            Object.keys(devicesData).forEach(deviceId => {
+                const device = devicesData[deviceId];
+                if (device.status === 'damaged') {
+                    const barangayId = device.id; // Use idName as the barangay ID
+                    const locationData = barangaysData.find(item => String(item.barangayId) === String(barangayId));
+
+                    if (locationData) {
+                        const combinedId = String(barangayId);
+                        const timestamp = new Date().getTime(); 
+
+                        selectedLocations.set(combinedId, {
+                            name: locationData.barangayName,
+                            type: 'current',
+                            outageId: String(timestamp),
+                            outageGawain: 'nulled'
+                        });
+
+                        console.log(`Added damaged device location ID: ${combinedId} (${locationData.barangayName}) with outageId: ${timestamp}`);
+                    } else {
+                        console.log('No matching barangay found for ID:', barangayId);
                     }
-                });
-            }
+                }
+            });
 
-            resolve(damagedDevices);
-        }, (error) => {
-            reject(error);
-        });
+            console.log('Selected Locations with Damaged Devices:', Array.from(selectedLocations.entries()));
+            highlightSelectedLocations(); 
+        } else {
+            console.log("No damaged devices found.");
+        }
+    }, (error) => {
+        console.error("Error fetching damaged devices in real-time:", error);
     });
 }
 
@@ -258,10 +272,14 @@ function highlightSelectedLocations() {
 
         if (selectedLocations.has(featureId)) {
             const outageType = selectedLocations.get(featureId).type; 
-            let fillColor = '#dc3545'; 
+            const outageGawain = selectedLocations.get(featureId).outageGawain; 
+            let fillColor = '#ff7b07'; 
             
             if (outageType === 'future') {
                 fillColor = '#ff7b07';
+            }
+            if (outageGawain === 'nulled') {
+                fillColor = '#dc3545';
             }
 
             return {
@@ -273,7 +291,7 @@ function highlightSelectedLocations() {
             
         } else {
             return {
-                fillColor: '#810FCB',
+                fillColor: '#dc3545',
                 strokeColor: '#FFFFFF',
                 strokeWeight: 0,
                 fillOpacity: 0
@@ -305,9 +323,9 @@ async function fetchFilteredOutages(isCurrentOutages) {
             const outageStartTime = parseInt(outage.startTime.replace(':', '')); // Convert HH:MM to HHMM
             const outageEndTime = parseInt(outage.endTime.replace(':', '')); // Convert HH:MM to HHMM
 
-            console.log(`Processing outage on ${outage.title} ${outageDate} from ${outageStartTime} to ${outageEndTime}`);
-            console.log(`Current Date: ${formattedDate}`);
-            console.log(`Current Time: ${currentTime}`);
+            // console.log(`Processing outage on ${outage.title} ${outageDate} from ${outageStartTime} to ${outageEndTime}`);
+            // console.log(`Current Date: ${formattedDate}`);
+            // console.log(`Current Time: ${currentTime}`);
 
             if (isCurrentOutages) {
                 // Check if outage is today and within the current time range
@@ -317,7 +335,7 @@ async function fetchFilteredOutages(isCurrentOutages) {
                         const locationName = getLocationName(location, barangaysData);
                         if (locationName) {
                             selectedLocations.set(location, { name: locationName, type: 'current', outageId, outageGawain });
-                            console.log(`Adding location ID: ${location} (${locationName}) for outage ${outageId}`);
+                            // console.log(`Adding location ID: ${location} (${locationName}) for outage ${outageId}`);
                         }
                     });
                 }
@@ -329,7 +347,7 @@ async function fetchFilteredOutages(isCurrentOutages) {
                         const locationName = getLocationName(location, barangaysData);
                         if (locationName) {
                             selectedLocations.set(location, { name: locationName, type: 'future', outageId, outageGawain });
-                            console.log(`Adding location ID: ${location} (${locationName}) for future outage ${outageId}`);
+                            // console.log(`Adding location ID: ${location} (${locationName}) for future outage ${outageId}`);
                         }
                     });
                 }
@@ -380,9 +398,12 @@ async function initializeDashboard() {
         listenToDamagedDevices();
         listenToOutages();
         listenToNews();
+        
         await initMap();
         await fetchFilteredOutages(true); 
-    
+        
+        fetchDamagedDevicesFromRTDB();
+
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('mainContainer').classList.remove('d-none');
 
