@@ -1,6 +1,7 @@
 // -------------------------------------------------- Firebase Imports
-import { firestore } from '../../../resources/js/config.js';
-import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { firestore, database } from '../../../resources/js/config.js';
+import { collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { ref, get, child, onValue,  } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js"; 
 
 let map;
 let tooltip;
@@ -10,6 +11,123 @@ const selectedLocations = new Map();
 const currentDate = new Date();
 const formattedDate = currentDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
 const currentTime = currentDate.getHours() * 100 + currentDate.getMinutes(); // Format: HHMM
+
+let selectedOutageId = null;
+
+window.showEditStatusModal = function(outageId) {
+    selectedOutageId = outageId;
+    const modal = new bootstrap.Modal(document.getElementById('editStatusModal'));
+    modal.show();
+}
+
+window.updateOutageStatus = async function() {
+    const status = document.getElementById('outageStatusSelect').value;
+
+    if (selectedOutageId) {
+        // Confirm the update action
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to update the outage status?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, update it!'
+
+        }).then(async (result) => {
+            
+            if (result.isConfirmed) {
+                
+                Swal.fire({
+                    title: 'Updating...',
+                    text: 'Please wait while the outage status is being updated.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                try {
+                    const outageRef = doc(firestore, 'outages', selectedOutageId);
+                    await updateDoc(outageRef, { status });
+
+                    // Close the modal and refresh the outage list
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editStatusModal'));
+                    modal.hide();
+                    await fetchFilteredOutages(true);
+
+                    // Show success message
+                    Swal.fire({
+                        title: 'Updated!',
+                        text: `Outage status has been updated to: ${status}`,
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    console.log(`Outage status updated to: ${status}`);
+                } catch (error) {
+                    console.error("Error updating outage status:", error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'There was a problem updating the outage status.',
+                        icon: 'error'
+                    });
+                }
+            }
+        });
+    }
+};
+
+
+// -------------------------------------------------- Fetch and Process Damaged Devices from RTDB
+
+function fetchDamagedDevicesFromRTDB() {
+    const damagedDevicesRef = ref(database, 'devices'); 
+
+    onValue(damagedDevicesRef, async (snapshot) => {
+        selectedLocations.clear(); // Clear the map to avoid duplicate entries
+        await fetchFilteredOutages(true); 
+
+        if (snapshot.exists()) {
+            const barangaysData = await fetchBarangaysData(); // Fetch barangay data
+            const devicesData = snapshot.val();
+
+            // Iterate over devices to find damaged ones and add them to selectedLocations
+            Object.keys(devicesData).forEach(deviceId => {
+                const device = devicesData[deviceId];
+                if (device.status === 'damaged') {
+                    const barangayId = device.id; // Use idName as the barangay ID
+                    const locationData = barangaysData.find(item => String(item.barangayId) === String(barangayId));
+
+                    if (locationData) {
+                        const combinedId = String(barangayId);
+                        const timestamp = new Date().getTime(); 
+
+                        selectedLocations.set(combinedId, {
+                            name: locationData.barangayName,
+                            type: 'current',
+                            outageId: String(timestamp),
+                            outageGawain: 'nulled'
+                        });
+
+                        console.log(`Added damaged device location ID: ${combinedId} (${locationData.barangayName}) with outageId: ${timestamp}`);
+                    } else {
+                        console.log('No matching barangay found for ID:', barangayId);
+                    }
+                }
+            });
+
+            console.log('Selected Locations with Damaged Devices:', Array.from(selectedLocations.entries()));
+            highlightSelectedLocations(); 
+        } else {
+            console.log("No damaged devices found.");
+        }
+    }, (error) => {
+        console.error("Error fetching damaged devices in real-time:", error);
+    });
+}
+
 
 // -------------------------------------------------- Fetch Data and Log to Console
 
@@ -30,9 +148,10 @@ async function init() {
         });
 
         await initMap();
+        
+        fetchDamagedDevicesFromRTDB();
         await fetchFilteredOutages(true);
         setupSearchBar();
-
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('map').classList.remove('d-none');
 
@@ -129,6 +248,7 @@ function displayOutageCards(outages) {
                     <h5 class="card-title fw-bold">${outage.title}</h5>
                     <p class="card-text mb-0 mt-2"><strong>Gawain:</strong> ${outage.gawain}</p>
                     <p class="card-text mb-0 mt-2"><strong>Date:</strong> ${new Date(outage.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})}</p>
+                    <p class="card-text mb-0 mt-2"><strong>Oras:</strong> ${outage.startTime} - ${outage.endTime}</p>
                     <p class="card-text mb-0 mt-2"><strong>Affected Locations:</strong> ${affectedLocations || 'None'}</p>
                 </div>
                 <div class="d-flex gap-2 p-2">
@@ -220,6 +340,7 @@ function highlightSelectedLocations() {
         }
     });
 }
+
 
 
 // -------------------------------------------------- Filter Outages by Date and Time

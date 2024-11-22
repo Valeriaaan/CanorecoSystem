@@ -126,6 +126,73 @@ function listenToNews() {
     });
 }
 
+// --------------------------------------------------  Function to fetch all devices from the real-time database
+
+async function fetchDevicesFromRTDB() {
+    const devicesRef = ref(database, 'devices'); 
+
+    try {
+        const snapshot = await get(devicesRef); // Fetch all devices at once
+        if (snapshot.exists()) {
+            const devicesData = snapshot.val();
+            console.log("Fetched devices data:", devicesData);
+            return devicesData; // Return all device data
+        } else {
+            console.log("No devices found.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching devices from the database:", error);
+        return null;
+    }
+}
+
+// Function to place markers on the map for each device
+async function markDevicesOnMap() {
+    const devicesData = await fetchDevicesFromRTDB();
+    if (!devicesData) return;
+
+    const barangaysData = await fetchBarangaysData(); // Fetch barangay data if needed
+
+    // Iterate over each device and place a marker on the map
+    Object.keys(devicesData).forEach(deviceId => {
+        const device = devicesData[deviceId];
+        const barangayId = device.id; // Assuming id represents barangayId
+        const locationData = barangaysData.find(item => String(item.barangayId) === String(barangayId));
+
+        if (locationData && device.latitude && device.longitude) {
+
+            let iconUrl = '';
+            if (device.status === 'damaged') {
+                iconUrl = '../../resources/images/img_device_red.png'; 
+            } else if (device.status === 'under repair') {
+                iconUrl = '../../resources/images/img_device_blue.png'; 
+            } else {
+                iconUrl = '../../resources/images/img_device_green.png'; 
+            }
+
+            const marker = new google.maps.Marker({
+                position: { lat: parseFloat(device.latitude), lng: parseFloat(device.longitude) },
+                map: map, 
+                title: locationData.barangayName || "Unknown Location",
+
+                icon: {
+                    url: iconUrl,
+                    scaledSize: new google.maps.Size(48, 48) 
+                }
+            });
+
+            // Add a click event listener to zoom to the location when the marker is clicked
+            marker.addListener('click', () => {
+                zoomToLocation(parseFloat(device.latitude), parseFloat(device.longitude));
+            });
+
+            console.log(`Marker added for device ID: ${deviceId} (${locationData.barangayName || "Unknown Location"})`);
+        } else {
+            console.log('No matching barangay found or missing coordinates for device ID:', deviceId);
+        }
+    });
+}
 
 // -------------------------------------------------- Fetch and Process Damaged Devices from RTDB
 
@@ -300,6 +367,15 @@ function highlightSelectedLocations() {
     });
 }
 
+function zoomToLocation(lat, lng) {
+    if (map) {
+        map.setCenter({ lat: lat, lng: lng });
+        map.setZoom(18); 
+    } else {
+        console.error('Map is not initialized');
+    }
+}
+
 function getLocationName(locationId, barangaysData) {
     const location = barangaysData.find(loc => `${loc.barangayId}` === locationId);
     return location ? location.fullName : null;
@@ -403,6 +479,8 @@ async function initializeDashboard() {
         await fetchFilteredOutages(true); 
         
         fetchDamagedDevicesFromRTDB();
+
+        markDevicesOnMap();
 
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('mainContainer').classList.remove('d-none');

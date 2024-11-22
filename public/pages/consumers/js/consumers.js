@@ -200,12 +200,12 @@ async function handleDelete(id) {
             // Delete the user from Firestore
             await deleteDoc(doc(firestore, 'users', id));
 
-            // Delete the user from Firebase Authentication using the same UID (id)
-            const userAuth = auth.currentUser; // Make sure you are authenticated as an admin to perform this operation
-            if (userAuth) {
-                const userToDelete = await auth.getUser(id); 
-                await deleteUser(userToDelete);
-            }
+            // // Delete the user from Firebase Authentication using the same UID (id)
+            // const userAuth = auth.currentUser; // Make sure you are authenticated as an admin to perform this operation
+            // if (userAuth) {
+            //     const userToDelete = await auth.getUser(id); 
+            //     await deleteUser(userToDelete);
+            // }
 
             Swal.fire('Deleted!', 'The user has been deleted.', 'success');
             $('#consumersTable').DataTable().ajax.reload();
