@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <link rel="stylesheet" href="../../resources/css/style.css">
-    <title>Schedule Outage &#8211; CANORECO</title>
+    <title>Edit Device &#8211; CANORECO</title>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -53,8 +53,6 @@
                                         <li><p class="dropdown-item text-muted mb-0">No new notifications</p></li>
                                     </ul>
                                 </li>
-                                
-                                
 
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle top-nav" href="#" id="navbarProfile" role="button"
@@ -65,7 +63,6 @@
 
                                     <ul class="dropdown-menu dropdown-menu-end " aria-labelledby="navbarProfile">
                                         <li><a class="dropdown-item text-dark" href="../profile/profile.html">Profile</a></li>
-                                        <li><a class="dropdown-item text-dark" href="#">Settings</a></li>
                                         <li><a class="dropdown-item text-dark" href="#" id="logout">Sign out</a></li> 
                                     </ul>
                                 </li>
@@ -79,7 +76,7 @@
                     <div class="row">
                         <div class="col-lg-5 col-md-6 p-4">
 
-                            <h4 class="fw-bold">Schedule Outage</h4>
+                            <h4 class="fw-bold">Edit Device</h4>
 
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb breadcrumb-chevron">
@@ -89,101 +86,48 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        <a class="link-body-emphasis fw-semibold text-decoration-none" href="outage.html">Outage</a>
+                                        <a class="link-body-emphasis fw-semibold text-decoration-none" href="device.html">Devices</a>
                                     </li>
                                     <li class="breadcrumb-item active" aria-current="page">
-                                        Schedule Outage
+                                        Edit Device
                                     </li>
                                 </ol>
                             </nav>
                             
                             <div class="row">
-                                <form class="left-container overflow-y-auto mb-3 needs-validation d-none" id="addOutageForm" novalidate>
+                                <form class="left-container overflow-y-auto mb-3 needs-validation" id="editDeviceForm" novalidate>
 
                                     <div class="mb-3">
-                                        <label for="title" class="form-label">Title</label>
-                                        <input type="text" class="form-control" id="title" placeholder="Enter title" required>
-                                        <div class="invalid-feedback">
-                                            Please provide a title.
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="date" class="form-label">Date</label>
-                                        <input type="date" class="form-control" id="date" placeholder="Enter date" required>
-                                        <div class="invalid-feedback">
-                                            Please select date.
-                                        </div>
+                                        <label for="deviceID" class="form-label">Device ID
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"data-bs-toggle="popover" data-bs-placement="right" 
+                                                data-bs-trigger="hover focus" data-bs-custom-class="custom-popover" data-bs-title="Select Location" 
+                                                data-bs-content="Please select an electric post on the map.">
+                                            </span>
+                                        </label>
+                                        <input type="text" class="form-control" id="deviceID" placeholder="Device ID" autocomplete="cc-exp-month" readonly>
                                     </div>
 
                                     <div class="mb-3">
-                                        <div class="row">
-                                            <div class="col">
-                                                <label for="start-time" class="form-label">Start Time</label>
-                                                <input type="time" class="form-control" id="start-time" placeholder="Start time" required>
-                                                <div class="invalid-feedback">
-                                                    Please select a start time.
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <label for="end-time" class="form-label">End Time</label>
-                                                <input type="time" class="form-control" id="end-time" placeholder="End time" required>
-                                                <div class="invalid-feedback">
-                                                    Please select an end time.
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <label for="municipality" class="form-label">Municipality
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"data-bs-toggle="popover" data-bs-placement="right" 
+                                                data-bs-trigger="hover focus" data-bs-custom-class="custom-popover" data-bs-title="Select Location" 
+                                                data-bs-content="Please select electric post on the map.">
+                                            </span>
+                                        </label>
+                                        <input type="text" class="form-control" id="municipality" placeholder="Municipality" autocomplete="cc-exp-month" readonly>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="gawain" class="form-label">Activity</label>
-                                        <input list="activityOptions" type="text" class="form-control" id="gawain" placeholder="Enter activity" required>
-                                        <datalist id="activityOptions">
-                                            <option value="Maintenance and Clearing activities.">
-                                            <option value="Opening and Closing of 69kV Disconnect Switch">
-                                            <option value="CAPEX line conversion; Line clearing; and Other maintenance work.">
-                                            <option value="Replacement of rotten poles, clearing of lines, and other maintenance work.">
-                                                
-                                        </datalist>
-                                        <div class="invalid-feedback">
-                                            Please provide an activity.
-                                        </div>
+                                        <label for="barangay" class="form-label">Barangay 
+                                            <span class="far fa-circle-question fa-sm text-muted ms-1"data-bs-toggle="popover" data-bs-placement="right" 
+                                                data-bs-trigger="hover focus" data-bs-custom-class="custom-popover" data-bs-title="Select Location" 
+                                                data-bs-content="Please select electric post on the map.">
+                                            </span>
+                                        </label>
+                                        <input type="text" class="form-control" id="barangay" placeholder="Barangay" autocomplete="cc-exp-month" readonly>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <label for="description" class="form-label">Description</label>
-                                        <input type="text" class="form-control" id="description" placeholder="Enter description" required>
-                                        <div class="invalid-feedback">
-                                            Please provide description.
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <div id="locationCheckboxContainer">
-                                            <label for="locationCheckboxContainer" class="form-label">Select Locations</label>
-                                            <!-- Checkboxes will be dynamically added here -->
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3 d-none">
-                                        <label for="selectedLocations" class="form-label">Selected Locations</label>
-                                        <ul id="selectedLocations" class="list-group">
-                                            <!-- List items will be added here dynamically -->
-                                        </ul>
-                                    </div>
-                                    
-                                    <div id="municipality-presets"></div>
-
-                                    <div class="mb-3">
-                                        <label for="images" class="form-label">Upload Images <span class="text-muted">(Optional)</span></label>
-                                        <input type="file" class="form-control" id="images" accept="image/jpeg, image/png" multiple>
-                                        <small class="form-text text-muted">Supported Formats: JPEG, PNG</small>
-                                        <div class="invalid-feedback">
-                                            Please upload a valid image file (JPEG, PNG, GIF).
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-main mb-3">Save</button>
+                                
+                                    <button type="submit" class="btn btn-main mb-3">Update</button>
                                 </form>
                             </div>
 
@@ -214,7 +158,7 @@
 
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
-    <script src="../outage/js/add-outage.js" type="module"></script>
+    <script src="../devices/js/edit-devices.js" type="module"></script>
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>

@@ -2,6 +2,7 @@
 import { firestore, database } from '../../../resources/js/config.js';
 import { collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { ref, get, child, onValue,  } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js"; 
+import { formatDate, formatTime, formatTimeTo12Hour, calculateDuration } from '../../../resources/js/main.js'; 
 
 let map;
 let tooltip;
@@ -246,9 +247,9 @@ function displayOutageCards(outages) {
             <div class="card-body" role="button">
                 <div class="p-2">
                     <h5 class="card-title fw-bold">${outage.title}</h5>
-                    <p class="card-text mb-0 mt-2"><strong>Gawain:</strong> ${outage.gawain}</p>
+                    <p class="card-text mb-0 mt-2"><strong>Activity:</strong> ${outage.gawain}</p>
                     <p class="card-text mb-0 mt-2"><strong>Date:</strong> ${new Date(outage.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})}</p>
-                    <p class="card-text mb-0 mt-2"><strong>Oras:</strong> ${outage.startTime} - ${outage.endTime}</p>
+                    <p class="card-text mb-0 mt-2"><strong>Time:</strong> ${formatTimeTo12Hour(outage.startTime)} - ${formatTimeTo12Hour(outage.endTime)} (${calculateDuration(outage.startTime,outage.endTime)})</p>
                     <p class="card-text mb-0 mt-2"><strong>Affected Locations:</strong> ${affectedLocations || 'None'}</p>
                 </div>
                 <div class="d-flex gap-2 p-2">
@@ -340,8 +341,6 @@ function highlightSelectedLocations() {
         }
     });
 }
-
-
 
 // -------------------------------------------------- Filter Outages by Date and Time
 

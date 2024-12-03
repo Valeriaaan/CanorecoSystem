@@ -2,7 +2,7 @@
 
 import { firestore } from '../../../resources/js/config.js';
 import { doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-import { formatDate } from '../../../resources/js/main.js';
+import { formatDate, calculateDuration } from '../../../resources/js/main.js';
 
 
 const selectedLocations = new Map();
@@ -107,24 +107,6 @@ function populateNewsContent(title, content, timestamp, category, image, date, s
         if (formattedHour === 0) formattedHour = 12;
 
         return `${formattedHour}:${minute} ${period}`;
-    }
-
-    // Function to calculate duration
-    function calculateDuration(startTime, endTime) {
-        const [startHour, startMinute] = startTime.split(':').map(Number);
-        const [endHour, endMinute] = endTime.split(':').map(Number);
-
-        const start = new Date();
-        start.setHours(startHour, startMinute);
-
-        const end = new Date();
-        end.setHours(endHour, endMinute);
-
-        const diffMs = end - start;
-        const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-        return `${diffHrs} hour(s) and ${diffMins} minute(s)`;
     }
 
     // Format startTime and endTime with AM/PM

@@ -136,10 +136,17 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="gawain" class="form-label">Gawain</label>
-                                        <input type="text" class="form-control" id="gawain" placeholder="Enter gawain" required>
+                                        <label for="gawain" class="form-label">Activity</label>
+                                        <input list="activityOptions" type="text" class="form-control" id="gawain" placeholder="Enter activity" required>
+                                        <datalist id="activityOptions">
+                                            <option value="Maintenance and Clearing activities.">
+                                            <option value="Opening and Closing of 69kV Disconnect Switch">
+                                            <option value="CAPEX line conversion; Line clearing; and Other maintenance work.">
+                                            <option value="Replacement of rotten poles, clearing of lines, and other maintenance work.">
+                                                
+                                        </datalist>
                                         <div class="invalid-feedback">
-                                            Please provide gawain.
+                                            Please provide an activity.
                                         </div>
                                     </div>
 
@@ -169,9 +176,10 @@
                                     
                                     <div class="mb-3">
                                         <label for="images" class="form-label">Upload Images <span class="text-muted">(Optional)</span></label>
-                                        <input type="file" class="form-control" id="images" accept="image/*" multiple>
+                                        <input type="file" class="form-control" id="images" accept="image/jpeg, image/png" multiple>
+                                        <small class="form-text text-muted">Supported Formats: JPEG, PNG</small>
                                         <div class="invalid-feedback">
-                                            Please upload at least one image.
+                                            Please upload a valid image file (JPEG, PNG, GIF).
                                         </div>
                                     </div>
                                 

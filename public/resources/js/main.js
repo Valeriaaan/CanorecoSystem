@@ -330,8 +330,43 @@ function formatTime(UNIX_timestamp) {
     var hour = a.getHours();
     var min = a.getMinutes();
     var sec = a.getSeconds();
-    var formattedTime = hour + ':' + (min < 10 ? '0' + min : min) + ':' + (sec < 10 ? '0' + sec : sec);
+    
+    var ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    hour = hour ? hour : 12; 
+    
+    // Format time in HH:MM:SS AM/PM
+    var formattedTime = hour + ':' + (min < 10 ? '0' + min : min) + ' ' + ampm;
+    
     return formattedTime;
 }
 
-export { formatMobileNumber , formatDate, formatTime };
+function formatTimeTo12Hour(time) {
+    if (!time) return null;
+    const [hour, minute] = time.split(':').map(Number);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const formattedHour = hour % 12 || 12; // Convert 0 to 12 for midnight
+    return `${formattedHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+}
+
+
+// Function to calculate duration
+function calculateDuration(startTime, endTime) {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+
+    const start = new Date();
+    start.setHours(startHour, startMinute);
+
+    const end = new Date();
+    end.setHours(endHour, endMinute);
+
+    const diffMs = end - start;
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${diffHrs} hr(s) & ${diffMins} min(s)`;
+    }
+
+
+export { formatMobileNumber , formatDate, formatTime, formatTimeTo12Hour, calculateDuration };

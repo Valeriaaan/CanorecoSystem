@@ -601,5 +601,6 @@ function highlightSelectedLocations() {
     });
 }
 
+
 // Call the main function to kick off the initialization process
 init();
