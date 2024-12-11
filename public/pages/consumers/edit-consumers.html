@@ -125,18 +125,6 @@
                                                 </div>
                                             </div>
 
-                                            <div class="mb-3">
-                                                <label for="birthdate" class="form-label">Birthdate</label>
-                                                <input type="date" class="form-control" id="birthdate" required>
-                                                <div class="invalid-feedback">Please select a birthdate.</div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="contactNumber" class="form-label">Contact Number</label>
-                                                <input type="tel" class="form-control" id="contactNumber" placeholder="Enter contact number" pattern="[0-9]{11}" maxlength="11" minlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" required>
-                                                <div class="invalid-feedback">Please enter a valid 11-digit contact number.</div>
-                                            </div>
-
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label for="municipality" class="form-label">Municipality</label>
@@ -152,6 +140,12 @@
                                                     </select>
                                                     <div class="invalid-feedback">Please select the barangay.</div>
                                                 </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="contactNumber" class="form-label">Contact Number</label>
+                                                <input type="tel" class="form-control" id="contactNumber" placeholder="Enter contact number" pattern="[0-9]{11}" maxlength="11" minlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" required>
+                                                <div class="invalid-feedback">Please enter a valid 11-digit contact number.</div>
                                             </div>
 
                                             <button type="submit" class="btn btn-primary">Edit Consumer</button>

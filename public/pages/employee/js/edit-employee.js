@@ -73,13 +73,10 @@ async function loadEmployeeData(employeeID) {
         if (docSnap.exists()) {
             const employeeData = docSnap.data();
 
-            const [month, day, year] = employeeData.dateOfBirth.split('-');
-
             document.getElementById('firstName').value = employeeData.firstName || "";
             document.getElementById('lastName').value = employeeData.lastName || "";
             document.getElementById('contactNumber').value = employeeData.phone || "";
             document.getElementById('municipality').value = employeeData.municipality || "";
-            document.getElementById('birthdate').value = `${year}-${month}-${day}` || "";
             document.getElementById('area').value = employeeData.area || "";
             document.getElementById('userType').value = employeeData.userType || "";
 
@@ -120,7 +117,6 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
     const municipality = document.getElementById('municipality').value;
     const barangay = document.getElementById('barangay').value;
     const contactNumber = document.getElementById('contactNumber').value;
-    const birthdate = document.getElementById('birthdate').value.split('-');
     const area = document.getElementById('area').value;
     const userType = document.getElementById('userType').value;
 
@@ -157,7 +153,6 @@ document.getElementById('editEmployeeForm').addEventListener('submit', async fun
                 municipality: municipality,
                 barangay: barangay,
                 phone: contactNumber,
-                dateOfBirth: `${birthdate[1].padStart(2, '0')}-${birthdate[2].padStart(2, '0')}-${birthdate[0]}`,
                 area: area,
                 userType: userType
             });

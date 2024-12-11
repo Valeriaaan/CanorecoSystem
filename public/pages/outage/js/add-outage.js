@@ -162,14 +162,14 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                 const selectedLocationsName = Array.from(document.getElementById('selectedLocations').children).map(li => 
                     li.getAttribute('data-municipality-id')
                 );
-
+                
                 // Add notifications only for users whose barangay and municipality match the selected locations
                 for (const user of usersData) {
                     const userBarangay = user.barangay || 'Not specified';
                     const userMunicipality = user.municipality || 'Not specified';
-                    const userKey = `${userMunicipality}, ${userBarangay}`;
+                    const userKey = `${userBarangay}`;
 
-                    if (selectedLocationsName.includes(userKey)) {
+                    if (selectedBarangayNames.includes(userKey)) {
                         console.log(`User's Barangay: ${userBarangay}, Municipality: ${userMunicipality} matches with selected locations.`);
 
                         const userNotificationsRef = collection(firestore, `users/${user.id}/notifications`);
@@ -183,7 +183,7 @@ document.getElementById('addOutageForm').addEventListener('submit', async functi
                         console.log(`Notification sent to user: ${user.id}`);
 
                     } else {
-                        console.log(`User's Barangay: ${userBarangay}, Municipality: ${userMunicipality} does not match any selected location.`);
+                        console.log(`User's Key: ${userKey} does not match any selected location.`);
                     }
                 }
 
@@ -462,6 +462,7 @@ function toggleSelectedLocation(selectedItem, isChecked) {
     if (isChecked) {
         // Add to selected locations if checked
         selectedLocations.add(locationId);
+
     } else {
         // Remove from selected locations if unchecked
         selectedLocations.delete(locationId);

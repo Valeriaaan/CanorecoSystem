@@ -73,13 +73,10 @@ async function loadConsumerData(consumerID) {
         if (docSnap.exists()) {
             const consumerData = docSnap.data();
 
-            const [month, day, year] = consumerData.dateOfBirth.split('-');
-
             document.getElementById('firstName').value = consumerData.firstName || "";
             document.getElementById('lastName').value = consumerData.lastName || "";
             document.getElementById('contactNumber').value = consumerData.phone || "";
             document.getElementById('municipality').value = consumerData.municipality || "";
-            document.getElementById('birthdate').value = `${year}-${month}-${day}` || "";
 
             const municipalitySelect = document.getElementById('municipality');
             municipalitySelect.dispatchEvent(new Event('change'));
@@ -115,7 +112,6 @@ document.getElementById('editConsumerForm').addEventListener('submit', async fun
     const municipality = document.getElementById('municipality').value;
     const barangay = document.getElementById('barangay').value;
     const contactNumber = document.getElementById('contactNumber').value;
-    const birthdate = document.getElementById('birthdate').value.split('-');
 
     const result = await Swal.fire({
         title: 'Are you sure?',
@@ -149,8 +145,7 @@ document.getElementById('editConsumerForm').addEventListener('submit', async fun
                 lastName: lastName,
                 municipality: municipality,
                 barangay: barangay,
-                phone: contactNumber,
-                dateOfBirth: `${birthdate[1].padStart(2, '0')}-${birthdate[2].padStart(2, '0')}-${birthdate[0]}`
+                phone: contactNumber
             });
 
             Swal.fire('Updated!', 'Consumer details have been updated.', 'success').then(() => {

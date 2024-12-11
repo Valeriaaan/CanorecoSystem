@@ -83,10 +83,10 @@
                         <div class="col p-4">
 
                             <div class="d-flex justify-content-between align-items-center">
-                                <h4 class="fw-bold">Employee</h4>
-                                <a href="logs.html" class="btn btn-main" role="button">
-                                    <span class="d-none d-sm-inline">Activity Logs</span>
-                                    <i class="fas fa-list d-inline d-sm-none"></i>
+                                <h4 class="fw-bold">Employee Activity Logs</h4>
+                                <a href="javascript:void(0);" onclick="window.history.back();" class="btn btn-secondary" role="button">
+                                    <span class="d-none d-sm-inline">Back</span>
+                                    <i class="fas fa-arrow-left d-inline d-sm-none"></i>
                                 </a>
                             </div>
                             
@@ -97,8 +97,11 @@
                                             <i class="fas fa-house fa-sm"></i><span class="visually-hidden">Home</span>
                                         </a>
                                     </li>
+                                    <li class="breadcrumb-item">
+                                        <a class="link-body-emphasis fw-semibold text-decoration-none" href="employee.html">Employee</a>
+                                    </li>
                                     <li class="breadcrumb-item active" aria-current="page">
-                                        Employee
+                                        Employee Activiy Logs
                                     </li>
                                 </ol>
                             </nav>
@@ -106,16 +109,13 @@
                             <!-- Data Table Card -->
                             <div class="card mt-3">
                                 <div class="card-body">
-                                    <table id="employeeTable" class="responsive w-100 d-none">
+                                    <table id="logsTable" class="responsive w-100 d-none">
                                         <thead>
                                             <tr></tr>
-                                                <th data-priority="1">Name</th>
-                                                <th>Contact Number</th>
-                                                <th>Role</th>
-                                                <th>Designation</th>
+                                                <th data-priority="1">Assigned</th>
+                                                <th>Device ID</th>
                                                 <th>Status</th>
-                                                <th>Access</th>
-                                                <th data-priority="2">Actions</th>
+                                                <th>Date & Time</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -148,7 +148,7 @@
     <!-- Scripts -->
     <script src="../../resources/js/main.js" type="module"></script>
     <script src="../../resources/js/config.js" type="module"></script>
-    <script src="../employee/js/employee.js" type="module"></script>
+    <script src="../employee/js/logs.js" type="module"></script>
 
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -45,6 +45,7 @@ function populateTable(data) {
         ],
         data: data,
         columns: [
+            { data: 'accountNumber', title: 'Acct Number', className: 'text-start' },
             {
                 data: null,
                 title: 'Name',
@@ -111,7 +112,7 @@ function populateTable(data) {
     });
 
     // Event listener for Access cell click
-    $('#consumersTable tbody').on('click', 'td:nth-child(5)', function () {
+    $('#consumersTable tbody').on('click', 'td:nth-child(6)', function () {
         const table = $('#consumersTable').DataTable();
         const rowData = table.row(this).data();
         handleAccessChange(rowData.id, rowData.access);

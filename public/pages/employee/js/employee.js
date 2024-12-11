@@ -1,15 +1,14 @@
 // -------------------------------------------------- Firebase Imports
 
-import { firestore, auth } from '../../../resources/js/config.js';
+import { firestore, auth, database } from '../../../resources/js/config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import { collection, getDocs, query, where, doc, deleteDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-
+import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
 // -------------------------------------------------- Fetch and display data
 
 async function fetchData() {
     const usersCollection = collection(firestore, 'users');
     let membersQuery = query(usersCollection, where('userType', 'in', ['linemen', 'admin']));
-
 
     try {
         onAuthStateChanged(auth, async (user) => {
@@ -36,6 +35,24 @@ async function fetchData() {
                 ...doc.data()
             }));
 
+            // Fetch assigned employees from RTDB
+            const assignedEmployees = await fetchAssignedEmployees();
+
+            // Update status for each employee
+            for (const employee of data) {
+                const fullName = `${employee.firstName} ${employee.lastName}`;
+                const status = assignedEmployees.includes(fullName) ? 'On a Task' : 'Unassigned';
+
+                // Update Firestore if the status has changed
+                if (employee.status !== status) {
+                    const userDocRef = doc(firestore, 'users', employee.id);
+                    await updateDoc(userDocRef, { status });
+                }
+
+                // Update local data for table
+                employee.status = status;
+            }
+
             populateTable(data);
 
             document.getElementById('employeeTable').classList.remove('d-none');
@@ -46,6 +63,28 @@ async function fetchData() {
     }
 }
 
+async function fetchAssignedEmployees() {
+    const assignedRef = ref(database, 'devices');
+    const snapshot = await get(assignedRef);
+    const assignedEmployees = [];
+
+    if (snapshot.exists()) {
+        const devices = snapshot.val();
+
+        // Iterate through each device and collect assigned employee names
+        Object.values(devices).forEach(device => {
+            if (device.assigned) {
+                assignedEmployees.push(device.assigned);
+            }
+        });
+
+        console.log('Assigned Employees:', assignedEmployees);
+        return assignedEmployees;
+    } else {
+        console.warn('No assigned employees found in RTDB.');
+        return [];
+    }
+}
 
 // -------------------------------------------------- Function to populate the DataTable
 
@@ -80,6 +119,15 @@ function populateTable(data) {
             { data: 'phone', title: 'Contact Number', className: 'text-start'  },
             { data: 'userType', title: 'Role', className: 'text-start' },
             { data: 'area', title: 'Designation', className: 'text-start'  },
+            {
+                data: 'status',
+                title: 'Status',
+                className: 'text-start',
+                render: function (data) {
+                    const badgeClass = data === 'On a Task' ? 'bg-primary' : 'bg-secondary  ';
+                    return `<span class="badge ${badgeClass}" style="padding: 5px 10px;">${data}</span>`;
+                }
+            },
             {
                 data: 'access',
                 title: 'Access',
